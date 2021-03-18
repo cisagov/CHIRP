@@ -22,17 +22,17 @@
 
 ## 📝 Table of Contents
 
-- [📝 Table of Contents](#-table-of-contents)
-- [🧐 About](#-about)
-- [🏁 Getting Started](#-getting-started)
+- [📝 Table of Contents](#-table-of-contents-)
+- [🧐 About](#-about-)
+- [🏁 Getting Started](#-getting-started-)
   - [Prerequisites](#prerequisites)
   - [Installing](#installing)
-- [⛏️ Built Using](#️-built-using)
-- [✍️ Authors](#️-authors)
-- [🎉 Acknowledgements](#-acknowledgements)
-- [🤝 Contributing](#-contributing)
-- [📝 License](#-license)
-- [⚖️ Legal Disclaimer](#️-legal-disclaimer)
+- [⛏️ Built Using](#️-built-using-)
+- [✍️ Authors](#️-authors-)
+- [🎉 Acknowledgements](#-acknowledgements-)
+- [🤝 Contributing](#-contributing-)
+- [📝 License](#-license-)
+- [⚖️ Legal Disclaimer](#️-legal-disclaimer-)
 
 ## 🧐 About
 
