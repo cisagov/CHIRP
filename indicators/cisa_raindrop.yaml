@@ -1,0 +1,32 @@
+---
+name: "Raindrop - Powershell Events (Invoke-Command)"
+description: "PowerShell commands were executed on a computer, attempting to execute further instances of Raindrop on additional computers in the organization"
+confidence: 7
+ioc_type: "events"
+indicator:
+  event_type: "Windows Powershell"
+  event.event_data: "~= Invoke-Command -ComputerName .* -ScriptBlock { rundll32 .*}.*"
+---
+name: "Raindrop - Security Events (Invoke-Command)"
+description: "PowerShell commands were executed on a computer, attempting to execute further instances of Raindrop on additional computers in the organization"
+confidence: 7
+ioc_type: "events"
+indicator:
+  event_type: "Security"
+  event.event_data: "~= Invoke-Command -ComputerName .* -ScriptBlock { rundll32 .*}.*"
+---
+name: "Raindrop - Powershell Events (Invoke-WMIMethod)"
+description: "PowerShell commands were executed on a computer, attempting to execute further instances of Raindrop on additional computers in the organization"
+confidence: 7
+ioc_type: "events"
+indicator:
+  event_type: "Windows Powershell"
+  event.event_data: "~= Invoke-WMIMethod win32_process -name create -argumentlist 'rundll32 .*' -ComputerName .*"
+---
+name: "Raindrop - Security Events (Invoke-WMIMethod)"
+description: "PowerShell commands were executed on a computer, attempting to execute further instances of Raindrop on additional computers in the organization"
+confidence: 7
+ioc_type: "events"
+indicator:
+  event_type: "Security"
+  event.event_data: "~= Invoke-WMIMethod win32_process -name create -argumentlist 'rundll32 .*' -ComputerName .*"

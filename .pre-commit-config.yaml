@@ -1,0 +1,69 @@
+---
+default_language_version:
+  python: python3
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.4.0
+    hooks:
+      - id: check-executables-have-shebangs
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-xml
+      - id: debug-statements
+      - id: detect-aws-credentials
+        args:
+          - --allow-missing-credentials
+      - id: detect-private-key
+      - id: end-of-file-fixer
+        exclude: files/(issue|motd)
+      - id: mixed-line-ending
+        args:
+          - --fix=lf
+      - id: pretty-format-json
+        args:
+          - --autofix
+      - id: requirements-txt-fixer
+      - id: trailing-whitespace
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.27.1
+    hooks:
+      - id: markdownlint
+        args:
+          - --config=./.github/.markdownlint.yaml
+  - repo: https://github.com/detailyang/pre-commit-shell
+    rev: 1.0.5
+    hooks:
+      - id: shell-lint
+  - repo: https://gitlab.com/pycqa/flake8
+    rev: 3.9.0
+    hooks:
+      - id: flake8
+        args:
+          - --config=./.github/.flake8
+        additional_dependencies:
+          - flake8-docstrings
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v2.10.1
+    hooks:
+      - id: pyupgrade
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.0
+    hooks:
+      - id: bandit
+        args:
+          - --config=./.github/.bandit.yml
+  - repo: https://github.com/python/black
+    rev: 20.8b1
+    hooks:
+      - id: black
+  - repo: https://github.com/PyCQA/isort
+    rev: '5.7.0'
+    hooks:
+      - id: isort
+        args: ["--profile", "black","--sp","./.github/.isort.cfg"]
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: 'v2.2.1'
+    hooks:
+      - id: prettier
+        types: [python]

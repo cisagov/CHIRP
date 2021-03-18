@@ -1,0 +1,24 @@
+---
+name: "Sibot - Registry"
+description: "Installs the second-stage script in the default registry value under the registry key"
+confidence: 9
+ioc_type: "registry"
+indicator:
+  registry_key: "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\sibot"
+  key: ".*"
+---
+name: "Sibot - Security Events"
+description: "Installs the second-stage script in the default registry value under the registry key"
+confidence: 9
+ioc_type: "events"
+indicator:
+  event_type: "Security"
+  event.event_data: "~= .* rundll32\\.exe vbscript: .* HKEY_LOCAL_MACHINE\\\\SOFTWARE\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\sibot .*"
+---
+name: "Sibot - Powershell Events"
+description: "Installs the second-stage script in the default registry value under the registry key"
+confidence: 9
+ioc_type: "events"
+indicator:
+  event_type: "Windows Powershell"
+  event.event_data: "~= .* rundll32\\.exe vbscript: .* HKEY_LOCAL_MACHINE\\\\SOFTWARE\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\sibot .*"

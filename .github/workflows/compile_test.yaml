@@ -1,0 +1,32 @@
+# We want to make sure whatever changes we make still allow the program to be compiled.
+name: Compile Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  compile_test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Requirements
+        run: |
+          py -m pip install -e .
+
+      - name: Compile
+        run: |
+          py -m nuitka --onefile chirp.py --windows-onefile-tempdir --plugin-enable=multiprocessing --plugin-enable=pylint-warnings --windows-uac-admin --assume-yes-for-downloads --windows-icon-from-ico=.\assets\CISA_Logo.ico
+
+      - name: Bundle
+        run: |
+          $compress = @{
+              LiteralPath= ".\README.md", ".\chirp.exe", ".\indicators", "chirp.py", ".\chirp", "LICENSE", "setup.py"
+              CompressionLevel = "Optimal"
+              DestinationPath = ".\chirp.zip"
+              }
+          Compress-Archive @compress

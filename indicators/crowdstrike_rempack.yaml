@@ -1,0 +1,20 @@
+---
+name: CrowdStrike Rempack
+description: Identifies Rempack beacon loader using unique strings.
+confidence: 10
+ioc_type: yara
+indicator:
+  files: "\\**"
+  rule: |
+    rule Rempack_Cobalt
+    {
+    meta:
+      description = "DETECTS rempack.dll cobalt strike"
+    strings:
+      $s0 = {41B94000000041B800100000498BD433C9}
+      $s1 = {33C9BA0080010041B8001000004C8BF8448D4940}
+      $s2 = {8031??48FFC1488B95C0000000488BC1482BC3483BC2}
+      $s3 = {9090909090904D5A4152554889E54881EC20000000488D1DEAFFFFFF}
+    condition:
+      ($s0 and $s1 and $s2) or ($s3)
+    }

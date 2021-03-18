@@ -1,0 +1,31 @@
+---
+name: "CISA Solar Fire"
+description: |
+  "Identifies unique strings within the modified Solar Winds application."
+confidence: 10 # 0-10
+ioc_type: "yara"
+indicator:
+  files: "\\**"
+  rule: |
+    rule CISA_10318927_01 : trojan rat SOLAR_FIRE
+    {
+    meta:
+       Author = "CISA Code & Media Analysis"
+       Incident = "10318927"
+       Date = "2020-12-13"
+       Last_Modified = "20201213_2145"
+       Category = "TROJAN RAT"
+       Family = "SOLAR_FIRE"
+       Description = "This signature is based off of unique strings embedded within the modified Solar Winds app"
+       MD5_1 = "b91ce2fa41029f6955bff20079468448"
+       SHA256_1 = "32519b85c0b422e4656de6e6c41878e95fd95026267daab4215ee59c107d6c77"
+       MD5_2 = "846e27a652a5e1bfbd0ddd38a16dc865"
+       SHA256_2 = "ce77d116a074dab7a22a0fd4f2c1ab475f16eec42e1ded3c0b0aa8211fe858d6"
+    strings:
+       $s0 = { 63 00 30 00 6B 00 74 00 54 00 69 00 37 00 4B 00 4C 00 43 00 6A 00 4A 00 7A 00 4D 00 38 00 44 }
+       $s1 = { 41 00 41 00 3D 00 3D 00 00 21 38 00 33 00 56 00 30 00 64 00 6B 00 78 00 4A 00 4B 00 55 }
+       $s2 = { 63 00 2F 00 46 00 77 00 44 00 6E 00 44 00 4E 00 53 00 30 00 7A 00 4B 00 53 00 55 00 30 00 42 00 41 00 41 00 3D 00 3D }
+       $s3 = { 53 00 69 00 30 00 75 00 42 00 67 00 41 00 3D 00 00 21 38 00 77 00 77 00 49 00 4C 00 6B 00 33 00 4B 00 53 00 79 00 30 00 42 }
+    condition:
+        all of them
+    }

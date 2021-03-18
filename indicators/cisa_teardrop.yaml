@@ -1,0 +1,89 @@
+---
+name: "CISA Teardrop"
+description: |
+  "Identifies unique byte values in Teardrop malware."
+confidence: 10 # 0-10
+ioc_type: "yara"
+indicator:
+  files: "\\**"
+  rule: |
+    rule CISA_10320115_01 : TEARDROP trojan backdoor
+    {
+    meta:
+       Author = "CISA Code & Media Analysis"
+       Incident = "10320115"
+       Date = "2020-12-31"
+       Last_Modified = "20201231_1800"
+       Actor = "n/a"
+       Category = "Trojan Backdoor"
+       Family = "TEARDROP"
+       Description = "Detects variants of TEARDROP malware"
+       MD5_1 = "f612bce839d855bbff98214a197489f7"
+       SHA256_1 = "dc20f4e50784533d7d10925e4b056f589cc73c139e97f40c0b7969728a28125c"
+       MD5_2 = "91e47c7bc9a7809e6b1560e34f2d6d7e"
+       SHA256_2 = "b37007db21a7f969d2c838f3bbbeb78a7402d66735bb5845ef31df9048cc33f0"
+       MD5_3 = "91e47c7bc9a7809e6b1560e34f2d6d7e"
+       SHA256_3 = "1817a5bf9c01035bcf8a975c9f1d94b0ce7f6a200339485d8f93859f8f6d730c"
+    strings:
+       $s0 = { 65 23 FB 7F 20 AA EB 0C B8 16 F6 BC 2F 4D D4 C4 39 97 C7 23 9F 3E 5C DE }
+       $s1 = { 5C E6 06 63 FA DE 44 C0 D4 67 95 28 12 47 C5 B5 EF 24 BC E4 }
+       $s2 = { 9E 96 BA 1B FB 7F 19 5A 8C 06 AB FA 43 3B F0 83 9E 54 0B 02 }
+       $s3 = { C2 7E 93 FC 02 B9 C6 DE 2B AF C6 C2 BE 2C 88 02 B4 1D 03 F5 }
+       $s4 = { 48 B8 53 4F 46 54 57 41 52 45 C7 44 24 60 66 74 5C 43 C6 44 24 66 00 48 89 44 24 50 48 B8 5C 4D 69 63 72 6F 73 6F }
+       $s5 = { 48 83 F8 FF 48 8D }
+       $s6 = { 8B 0A 48 83 C2 04 8D 81 FF FE FE FE F7 D1 21 C8 25 80 80 80 80 }
+       $s7 = { 5B 5E 5F 5D 41 5C 41 }
+       $s8 = { 4E 00 65 00 74 00 77 00 6F 00 72 00 6B 00 20 00 53 00 65 00 74 00 75 00 70 00 20 00 53 00 65 00 72 00 76 00 69 00 63 00 65 }
+       $s9 = { 64 6C 6C 00 4E 65 74 53 65 74 75 70 53 65 72 76 69 63 65 4D 61 69 6E }
+       $s10 = { 41 31 C0 45 88 04 0A 48 83 C1 01 45 89 C8 41 39 CB 7F }
+    condition:
+       ($s0 or $s1 or $s2 or $s3) or ($s4 and $s5 and $s6 and $s7 and $s8 and $s9 and $s10)
+    }
+---
+name: "Teardrop - Kernel Events"
+description: "Teardrop blocked from loading the non-Microsoft-signed binary."
+confidence: 7
+ioc_type: "events"
+indicator:
+   event_type: "Microsoft-Windows-Security-Mitigations%4KernelMode"
+   event.event_data: "~= .*\\\\Windows\\\\SysWOW64\\\\NetSetupSvc.dll.*"
+---
+name: "Teardrop - Registry Activity"
+description: "Variant 1: checks the presence of the Windows registry key SOFTWARE\\Microsoft\\CTF and terminates if the registry key is present or accessible. A hit on this key indicates Variant 1 likely terminated, if suspected on system."
+confidence: 4
+ioc_type: "registry"
+indicator:
+   registry_key: "HKEY_LOCAL_MACHINE\\Software\\Microsoft\\CTF"
+   key: "~= .*"
+---
+name: "Teardrop - Powershell Events (Variant 1)"
+description: "Variant1: When executed during lateral movement, rundll32.exe ran through WMIC or Invoke-WMIMethod with “High” integrity level and spawned by WmiPrvSE.exe, which is a rare combination. The Cobalt Strike DLL was likely deleted after completed execution to avoid forensic recovery"
+confidence: 9
+ioc_type: "events"
+indicator:
+   event_type: "Windows Powershell"
+   event.event_data: "~= .*Invoke-WMIMethod win32_process -name create -argumentlist ‘rundll32.*dll.*’.*"
+---
+name: "Teardrop - Security Events (Variant 1)"
+description: "Variant1: When executed during lateral movement, rundll32.exe ran through WMIC or Invoke-WMIMethod with “High” integrity level and spawned by WmiPrvSE.exe, which is a rare combination. The Cobalt Strike DLL was likely deleted after completed execution to avoid forensic recovery"
+confidence: 9
+ioc_type: "events"
+indicator:
+   event_type: "Security"
+   event.event_data: "~= Invoke-WMIMethod win32_process -name create -argumentlist ‘rundll32.*dll.*’.*"
+---
+name: "Teardrop - Powershell Events (Variant 2)"
+description: "Variant2: When executed during lateral movement, rundll32.exe ran through WMIC or Invoke-WMIMethod with “High” integrity level and spawned by WmiPrvSE.exe, which is a rare combination. The Cobalt Strike DLL was likely deleted after completed execution to avoid forensic recovery"
+confidence: 9
+ioc_type: "events"
+indicator:
+   event_type: "Windows Powershell"
+   event.event_data: '~= wmic /node: process call create “rundll32.*dll.*[export].* ”'
+---
+name: "Teardrop - Security Events (Variant 2)"
+description: "Variant2: When executed during lateral movement, rundll32.exe ran through WMIC or Invoke-WMIMethod with “High” integrity level and spawned by WmiPrvSE.exe, which is a rare combination. The Cobalt Strike DLL was likely deleted after completed execution to avoid forensic recovery"
+confidence: 9
+ioc_type: "events"
+indicator:
+   event_type: "Security"
+   event.event_data: '~= wmic /node: process call create “rundll32.*dll.*[export].* ”'

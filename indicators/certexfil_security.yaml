@@ -1,0 +1,104 @@
+---
+name: Cert Exfil/Export - Security Events (Export-PfxCertificate)
+description: "Cert Exfil/Export"
+confidence: 3
+ioc_type: "events"
+indicator:
+  event_type: "Security"
+  event.event_data: "~= .*Export-PfxCertificate.*"
+---
+name: Cert Exfil/Export - Security Events (Certutil)
+description: "Cert Exfil/Export"
+confidence: 3
+ioc_type: "events"
+indicator:
+  event_type: "Security"
+  event.event_data: "~= certutil.*"
+---
+name: Cert Exfil/Export - Security Events (ExportPFX)
+description: "Cert Exfil/Export"
+confidence: 3
+ioc_type: "events"
+indicator:
+  event_type: "Security"
+  event.event_data: "~= .*-export PFX.*"
+---
+name: Cert Exfil/Export - Security Events (Export-Certificate)
+description: "Cert Exfil/Export"
+confidence: 3
+ioc_type: "events"
+indicator:
+  event_type: "Security"
+  event.event_data: "~= .*Export-Certificate.*"
+---
+name: Cert Exfil/Export - Security Events (Add-AdfsCertificate)
+description: "Cert Exfil/Export"
+confidence: 3
+ioc_type: "events"
+indicator:
+  event_type: "Security"
+  event.event_data: "~= Add-AdfsCertificate.*"
+---
+name: Cert Exfil/Export - Security Events (Get-AdfsCertificate)
+description: "Cert Exfil/Export"
+confidence: 3
+ioc_type: "events"
+indicator:
+  event_type: "Security"
+  event.event_data: "~= Get-AdfsCertificate.*"
+---
+name: Cert Exfil/Export - Security Events (Get-AdfsSslCertificate)
+description: "Cert Exfil/Export"
+confidence: 3
+ioc_type: "events"
+indicator:
+  event_type: "Security"
+  event.event_data: "~= Get-AdfsSslCertificate.*"
+---
+name: Cert Exfil/Export - Security Events (New-AdfsAzureMfaTenantCertificate)
+description: "Cert Exfil/Export"
+confidence: 3
+ioc_type: "events"
+indicator:
+  event_type: "Security"
+  event.event_data: "~= .*New-AdfsAzureMfaTenantCertificate.*"
+---
+name: Cert Exfil/Export - Security Events (Set-AdfsCertificate)
+description: "Cert Exfil/Export"
+confidence: 3
+ioc_type: "events"
+indicator:
+  event_type: "Security"
+  event.event_data: "~= Set-AdfsCertificate.*"
+---
+name: Cert Exfil/Export - Security Events (Set-AdfsSslCertificate)
+description: "Cert Exfil/Export"
+confidence: 3
+ioc_type: "events"
+indicator:
+  event_type: "Security"
+  event.event_data: "~= Set-AdfsSslCertificate.*"
+---
+name: Cert Exfil/Export - Security Events (Update-AdfsCertificate)
+description: "Cert Exfil/Export"
+confidence: 3
+ioc_type: "events"
+indicator:
+  event_type: "Security"
+  event.event_data: "~= Update-AdfsCertificate.*"
+---
+name: Cert Exfil/Export - Security Events (IX509PrivateKey)
+description: "Cert Exfil/Export"
+confidence: 3
+ioc_type: "events"
+indicator:
+  event_type: "Security"
+  event.event_data: "~= .*IX509PrivateKey.*"
+---
+name: Cert Exfil/Export - Security Events (System.Security.Cryptography.X509Certificates)
+description: "Cert Exfil/Export"
+confidence: 3
+ioc_type: "events"
+indicator:
+  event_type: "Security"
+  event.event_data: "~= .*System.Security.Cryptography.X509Certificates.*"

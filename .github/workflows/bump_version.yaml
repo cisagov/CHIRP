@@ -1,0 +1,53 @@
+name: bump_version
+
+on:
+  workflow_dispatch:
+
+jobs:
+  bump_version:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - id: compute_tag
+        uses: craig-day/compute-tag@v10
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          version_scheme: semantic
+
+      - name: Compile
+        run: |
+          py -m pip install -e .
+          py -m nuitka --onefile test.py --windows-onefile-tempdir --plugin-enable=multiprocessing --plugin-enable=pylint-warnings --assume-yes-for-downloads --windows-uac-admin
+
+      - name: Bundle
+        run: |
+          $compress = @{
+          LiteralPath= ".\README.md", ".\chirp.exe", ".\indicators", "chirp.py", ".\chirp", "LICENSE", "setup.py"
+          CompressionLevel = "Optimal"
+          DestinationPath = ".\chirp.zip"
+          }
+          Compress-Archive @compress
+      - name: create release
+        uses: actions/create-release@v1
+        id: create_release
+        with:
+          tag_name: ${{ steps.compute_tag.outputs.next_tag }}
+          release_name: ${{ steps.compute_tag.outputs.next_tag }}
+          draft: true
+          prerelease: false
+          body: >
+            Automatic release of ${{ steps.compute_tag.outputs.next_tag }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+          asset_path: ./chirp.zip
+          asset_name: chirp.zip
+          asset_content_type: application/zip
