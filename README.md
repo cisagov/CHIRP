@@ -52,7 +52,7 @@ We build and release CHIRP via
 [`Releases`](https://github.com/cisagov/chirp/releases).
 However, if you wish to run with Python3.6+, follow these instructions.
 
-You can also write new 
+You can also write new
 [indicators](https://github.com/cisagov/CHIRP/blob/main/indicators/README.md)
 or [plugins](https://github.com/cisagov/CHIRP/blob/main/chirp/plugins/README.md)
 for CHIRP.
