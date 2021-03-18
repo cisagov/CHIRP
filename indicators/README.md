@@ -64,8 +64,9 @@ CHIRP operators follow a simple format, leveraging the yaml's key: value constru
 event.event_data.subject_user_sid: '== S-1-5-18'
 ```
 
-In the above example, the indicator is looking for a key of security.user_id that
-has a value equal (==) to S-1-5-18. This would match on an artifact that looks like:
+In the above example, the indicator is looking for a key of
+event.event_data.subject_user_sid that has a value equal (==) to S-1-5-18. This would
+match on an artifact that looks like:
 
 ```json
 {
