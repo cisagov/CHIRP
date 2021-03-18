@@ -18,7 +18,7 @@ jobs:
       - name: Compile
         run: |
           py -m pip install -e .
-          py -m nuitka --onefile test.py --windows-onefile-tempdir --plugin-enable=multiprocessing --plugin-enable=pylint-warnings --assume-yes-for-downloads --windows-uac-admin
+          py -m nuitka --onefile chirp.py --windows-onefile-tempdir --plugin-enable=multiprocessing --plugin-enable=pylint-warnings --windows-uac-admin --assume-yes-for-downloads --windows-icon-from-ico=.\assets\CISA_Logo.ico
 
       - name: Bundle
         run: |
