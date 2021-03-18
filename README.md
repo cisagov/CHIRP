@@ -23,7 +23,8 @@
 ## 📝 Table of Contents
 
 - [📝 Table of Contents](#-table-of-contents-)
-- [🧐 About](#-about-)
+- [🧐 About](#-about)
+- [🎈 Usage](#-usage-)
 - [🏁 Getting Started](#-getting-started-)
   - [Prerequisites](#prerequisites)
   - [Installing](#installing)
