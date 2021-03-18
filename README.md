@@ -24,10 +24,10 @@
 
 - [📝 Table of Contents](#-table-of-contents-)
 - [🧐 About](#-about)
-- [🎈 Usage](#-usage-)
 - [🏁 Getting Started](#-getting-started-)
   - [Prerequisites](#prerequisites)
   - [Installing](#installing)
+- [🎈 Usage](#-usage-)
 - [⛏️ Built Using](#️-built-using-)
 - [✍️ Authors](#️-authors-)
 - [🎉 Acknowledgements](#-acknowledgements-)
