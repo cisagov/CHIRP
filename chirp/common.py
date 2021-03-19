@@ -4,6 +4,7 @@
 import argparse
 import ctypes
 import os
+import queue
 import sys
 import threading
 import typing as t
@@ -60,13 +61,13 @@ def _get_platform():
 
 _CONSOLE = Console(record=True)
 
-_console_queue = []
+_console_queue = queue.Queue()
 
-CONSOLE = lambda x: _console_queue.append(x)
-_INFO = lambda x: _console_queue.append("[green][+][/green] {}".format(x))
-_ERROR = lambda x: _console_queue.append("[red][-][/red] {}".format(x))
-_CRITICAL = lambda x: _console_queue.append("[cyan][!][/cyan] {}".format(x))
-_DEBUG = lambda x: _console_queue.append("[yellow][?][/yellow] {}".format(x))
+CONSOLE = lambda x: _console_queue.put(x)
+_INFO = lambda x: _console_queue.put("[green][+][/green] {}".format(x))
+_ERROR = lambda x: _console_queue.put("[red][-][/red] {}".format(x))
+_CRITICAL = lambda x: _console_queue.put("[cyan][!][/cyan] {}".format(x))
+_DEBUG = lambda x: _console_queue.put("[yellow][?][/yellow] {}".format(x))
 
 """
 A workaround to log levels, gives us greater control in the main program.
@@ -99,9 +100,11 @@ install()
 def _logger():
     """Use a queue to prevent async functions from writing to the console at the same time. Sleep for 2 seconds then checks if there is data to write out."""
     if _console_queue:
-        while _console_queue:
-            _CONSOLE.log(_console_queue.pop())
-    threading.Timer(2.0, _logger).start()
+        while not _console_queue.empty():
+            _CONSOLE.log(_console_queue.get())
+    _thread = threading.Timer(interval=2, function=_logger)
+    _thread.daemon = True
+    _thread.start()
 
 
 _logger()
