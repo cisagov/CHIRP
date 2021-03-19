@@ -20,6 +20,11 @@ jobs:
           py -m pip install -e .
           py -m nuitka --onefile chirp.py --windows-onefile-tempdir --plugin-enable=multiprocessing --plugin-enable=pylint-warnings --windows-uac-admin --assume-yes-for-downloads --windows-icon-from-ico=.\assets\CISA_Logo.ico
 
+      - name: Hash
+        id: hash
+        run: |
+          Get-ChildItem -Recurse -Path @('chirp.exe', 'chirp.py', 'chirp\*.py') -Exclude "chirp.dist"| %{Get-FileHash $_ |  Export-Csv  -Path 'hashes.csv' -Append -NoTypeInformation} 2>&1 | Out-Null
+
       - name: Bundle
         run: |
           $compress = @{
@@ -28,7 +33,8 @@ jobs:
           DestinationPath = ".\chirp.zip"
           }
           Compress-Archive @compress
-      - name: create release
+
+      - name: Create Release
         uses: actions/create-release@v1
         id: create_release
         with:
@@ -41,8 +47,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload Release Asset
-        id: upload-release-asset
+      - name: Upload Zip
+        id: upload-zip
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -51,3 +57,14 @@ jobs:
           asset_path: ./chirp.zip
           asset_name: chirp.zip
           asset_content_type: application/zip
+
+      - name: Upload Hashes
+        id: upload-hashes
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+          asset_path: ./hashes.csv
+          asset_name: hashes.csv
+          asset_content_type: text/csv
