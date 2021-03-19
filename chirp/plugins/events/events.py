@@ -14,7 +14,6 @@ from chirp.common import CONSOLE, JSON, OS
 HAS_LIBS = False
 try:
     # cisagov Libraries
-    from chirp.common import OS
     from chirp.plugins.events.evtx2json import iter_evtx2xml, splunkify, xml2json
 
     HAS_LIBS = True
@@ -25,19 +24,25 @@ except ImportError:
 
 PATH = Path(sys.executable)
 
+
 def _path_iterator():
     dirs = ("Sysnative", "System32")
-    for letter in re.findall(r"[A-Z]+:.*$", os.popen("mountvol /").read(), re.MULTILINE): # nosec
+    for letter in re.findall(
+        r"[A-Z]+:.*$", os.popen("mountvol /").read(), re.MULTILINE  # nosec
+    ):
         for d in dirs:
             if os.path.exists(letter + "\\Windows\\{}\\winevt\\Logs".format(d)):
                 return letter + "\\Windows\\{}\\winevt\\Logs\\".format(d) + "{}.evtx"
     return None
 
+
 default_dir = _path_iterator()
 
 if not default_dir:
     if OS == "Windows":
-        CONSOLE("[red][!][/red] We can't find windows event logs at their standard path.")
+        CONSOLE(
+            "[red][!][/red] We can't find windows event logs at their standard path."
+        )
     HAS_LIBS = False
 
 
