@@ -9,12 +9,11 @@ import sys
 from typing import Any, Dict, Iterator, List, Union
 
 # cisagov Libraries
-from chirp.common import CONSOLE, JSON
+from chirp.common import CONSOLE, JSON, OS
 
 HAS_LIBS = False
 try:
     # cisagov Libraries
-    from chirp.common import OS
     from chirp.plugins.events.evtx2json import iter_evtx2xml, splunkify, xml2json
 
     HAS_LIBS = True
@@ -25,18 +24,24 @@ except ImportError:
 
 PATH = Path(sys.executable)
 
-# Depending on if this is 32bit or 64bit Windows, the logs can be at System32 or Sysnative.
-if os.path.exists(PATH.drive + "\\Windows\\Sysnative\\winevt"):
-    default_dir = PATH.drive + "\\Windows\\Sysnative\\winevt\\Logs\\{}.evtx"
-elif os.path.exists(PATH.drive + "\\Windows\\System32\\winevt"):
-    default_dir = PATH.drive + "\\Windows\\System32\\winevt\\Logs\\{}.evtx"
-else:
-    # TODO: Implement switch
+
+def _path_iterator():
+    dirs = ("Sysnative", "System32")
+    for letter in re.findall(
+        r"[A-Z]+:.*$", os.popen("mountvol /").read(), re.MULTILINE  # nosec
+    ):
+        for d in dirs:
+            if os.path.exists(letter + "\\Windows\\{}\\winevt\\Logs".format(d)):
+                return letter + "\\Windows\\{}\\winevt\\Logs\\".format(d) + "{}.evtx"
+    return None
+
+
+default_dir = _path_iterator()
+
+if not default_dir:
     if OS == "Windows":
         CONSOLE(
-            "[red][!][/red] We can't find the windows event logs at {}\\System32\\winevt or at {}\\Sysnative\\winevt.".format(
-                PATH.drive, PATH.drive
-            )
+            "[red][!][/red] We can't find windows event logs at their standard path."
         )
     HAS_LIBS = False
 
@@ -64,11 +69,12 @@ if HAS_LIBS:
         :yield: JSON formatted representation of an event log.
         :rtype: Iterator[JSON]
         """
-        for xml_str in iter_evtx2xml(evtx_file):
-            try:
-                yield splunkify(xml2json(xml_str), source=evtx_file)
-            except:  # noqa: E722
-                pass
+        if os.path.exists(evtx_file):
+            for xml_str in iter_evtx2xml(evtx_file):
+                try:
+                    yield splunkify(xml2json(xml_str), source=evtx_file)
+                except:  # noqa: E722
+                    pass
 
     def t_dict(d: Union[List, Dict]) -> Union[Dict, List]:
         """Given a dictionary, converts the CamelCase keys to snake_case.

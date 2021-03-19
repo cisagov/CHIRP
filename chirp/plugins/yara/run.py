@@ -71,7 +71,8 @@ if HAS_LIBS:
         ignorelist = [
             "\\OneDrive\\",
             "\\OneDriveTemp\\",
-        ]  # Ignore these paths, so we don't enumerate cloud drives
+            os.getcwd(),
+        ]  # Ignore these paths, so we don't enumerate cloud drives or our current working directory
         if count % 50000 == 0 and count != 0:
             CONSOLE(
                 "[cyan][YARA][/cyan] We're still working on scanning files. {} processed.".format(
