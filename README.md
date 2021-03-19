@@ -18,6 +18,7 @@
 <p align="center"> A forensic collection tool written in Python.
     <br>
 </p>
+<p align="center"> Watch the <a href="https://www.youtube.com/watch?v=UGYSNiNOpds">video overview</a></p>
 </div>
 
 ## 📝 Table of Contents
