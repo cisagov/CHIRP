@@ -18,21 +18,23 @@
 <p align="center"> A forensic collection tool written in Python.
     <br>
 </p>
+<p align="center"> Watch the <a href="https://www.youtube.com/watch?v=UGYSNiNOpds">video overview</a></p>
 </div>
 
 ## 📝 Table of Contents
 
-- [📝 Table of Contents](#-table-of-contents)
+- [📝 Table of Contents](#-table-of-contents-)
 - [🧐 About](#-about)
-- [🏁 Getting Started](#-getting-started)
+- [🏁 Getting Started](#-getting-started-)
   - [Prerequisites](#prerequisites)
   - [Installing](#installing)
-- [⛏️ Built Using](#️-built-using)
-- [✍️ Authors](#️-authors)
-- [🎉 Acknowledgements](#-acknowledgements)
-- [🤝 Contributing](#-contributing)
-- [📝 License](#-license)
-- [⚖️ Legal Disclaimer](#️-legal-disclaimer)
+- [🎈 Usage](#-usage-)
+- [⛏️ Built Using](#️-built-using-)
+- [✍️ Authors](#️-authors-)
+- [🎉 Acknowledgements](#-acknowledgements-)
+- [🤝 Contributing](#-contributing-)
+- [📝 License](#-license-)
+- [⚖️ Legal Disclaimer](#️-legal-disclaimer-)
 
 ## 🧐 About
 
@@ -50,6 +52,11 @@ that has spilled into the enterprise environment.
 We build and release CHIRP via
 [`Releases`](https://github.com/cisagov/chirp/releases).
 However, if you wish to run with Python3.6+, follow these instructions.
+
+You can also write new
+[indicators](https://github.com/cisagov/CHIRP/blob/main/indicators/README.md)
+or [plugins](https://github.com/cisagov/CHIRP/blob/main/chirp/plugins/README.md)
+for CHIRP.
 
 ### Prerequisites
 
