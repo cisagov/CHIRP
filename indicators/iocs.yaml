@@ -2307,6 +2307,13 @@ indicator:
     reyweb.com
     onetechcompany.com
     reyweb.com
+---
+name: "March 2021 Exchange Vulnerabilities Network indicators"
+description: "Network activity related to the March 2021 Exchange vulnerabilities."
+confidence: 3
+ioc_type: "network"
+indicator:
+  ips: |
     103.77.192.219
     104.140.114.110
     104.250.191.110
