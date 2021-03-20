@@ -10,8 +10,8 @@ jobs:
   pre-commit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-      - uses: actions/setup-python@v1
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
       - name: Set PY
         id: setpy
         run: |
@@ -20,4 +20,4 @@ jobs:
         with:
           path: ~/.cache/pre-commit
           key: pre-commit|${{ env.PY }}|${{ hashFiles('.pre-commit-config.yaml') }}
-      - uses: pre-commit/action@v1.0.1
+      - uses: pre-commit/action@v2
