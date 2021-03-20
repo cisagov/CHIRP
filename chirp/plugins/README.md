@@ -75,10 +75,10 @@ In `chirp.common` we have multiple logging methods. These methods will or will
 not print out based on the log level set with -l/--log-level. They all accept
 some string input and print to the program log.
 
-- `INFO()`: Preceeds output with green \[\+\]
-- `ERROR()`: Preceeds output with red \[\-\]
-- `CRITICAL()`: Preceeds output with cyan \[\!\]
-- `DEBUG()`: Preceeds output with yellow \[\?\]
+- `INFO()`: Precedes output with green \[\+\]
+- `ERROR()`: Precedes output with red \[\-\]
+- `CRITICAL()`: Precedes output with cyan \[\!\]
+- `DEBUG()`: Precedes output with yellow \[\?\]
 - `CONSOLE()`: Raw output to log output.
 
 ### Typing

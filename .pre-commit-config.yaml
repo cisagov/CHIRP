@@ -67,3 +67,10 @@ repos:
     hooks:
       - id: prettier
         types: [python]
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.0.0
+    hooks:
+      - id: codespell
+        args:
+          - --ignore-words-list=ba,fo
+          - --quiet-level=2
