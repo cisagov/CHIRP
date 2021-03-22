@@ -2307,7 +2307,26 @@ indicator:
     reyweb.com
     onetechcompany.com
     reyweb.com
-
+---
+name: "CISA Alert AA21-062A Network indicators"
+description: "Network activity related to CISA Alert (AA21-062A). https://us-cert.cisa.gov/ncas/alerts/aa21-062a"
+confidence: 3
+ioc_type: "network"
+indicator:
+  ips: |
+    103.77.192.219
+    104.140.114.110
+    104.250.191.110
+    108.61.246.56
+    149.28.14.163
+    157.230.221.198
+    167.99.168.251
+    185.250.151.72
+    192.81.208.169
+    203.160.69.66
+    211.56.98.146
+    5.254.43.18
+    80.92.205.81
 
 #Registry Query
 
