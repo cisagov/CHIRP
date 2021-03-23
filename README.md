@@ -93,7 +93,7 @@ with [Visual Studio Community](https://visualstudio.microsoft.com/vs/community/)
 ### From python
 
 ```console
-# defaults 
+# defaults
 python3 chirp.py
 
 # with args
