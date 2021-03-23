@@ -26,8 +26,12 @@ parser.add_argument(
     help="Log level. Info, Error, Critical, or Debug.",
     default="silent",
 )
+parser.add_argument(
+    "-p", "--plugins", nargs="*", help="Specified plugins to run.", default="all"
+)
 ARGS, _ = parser.parse_known_args()
 OUTPUT_DIR = ARGS.output
+PLUGINS = ARGS.plugins
 
 
 def _sinkhole(*args, **kwargs) -> None:
