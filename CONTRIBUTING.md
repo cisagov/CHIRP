@@ -99,9 +99,9 @@ can create and configure the Python virtual environment with these
 commands:
 
 ```console
-cd check-your-pulse
-pyenv virtualenv <python_version_to_use> check-your-pulse
-pyenv local check-your-pulse
+cd <repo-dir>
+pyenv virtualenv <python_version_to_use> <repo-dir>
+pyenv local <repo-dir>
 ```
 
 #### Installing the pre-commit hook ####
