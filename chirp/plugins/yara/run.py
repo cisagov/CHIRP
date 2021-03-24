@@ -10,7 +10,7 @@ import re
 from typing import Any, Dict, Iterator, Tuple, Union
 
 # cisagov Libraries
-from chirp.common import CONSOLE, OS, OUTPUT_DIR, build_report
+from chirp.common import CONSOLE, OS, OUTPUT_DIR, TARGETS, build_report
 
 try:
     # Third-Party Libraries
@@ -112,8 +112,12 @@ if HAS_LIBS:
 
         CONSOLE("[cyan][YARA][/cyan] Entered yara plugin.")
 
-        files = [i["indicator"]["files"] for i in indicators]
+        files = (
+            [i["indicator"]["files"] for i in indicators] if not TARGETS else TARGETS
+        )
         files = "\\**" if "\\**" in files else ", ".join(files)
+
+        CONSOLE("[cyan][YARA][/cyan] Yara targets: {}".format(files))
 
         if files == "\\**":
             blame = [i["name"] for i in indicators if i["indicator"]["files"] == "\\**"]
