@@ -3,7 +3,7 @@
 # Standard Python Libraries
 import importlib
 import pkgutil
-from typing import Callable, Dict
+from typing import Callable, Dict, List
 
 # cisagov Libraries
 from chirp.common import ADMIN, DEBUG, ERROR, INFO, OS
@@ -76,16 +76,16 @@ def _loader(name: str, discovered_plugins: Dict[str, Callable]) -> None:
         ERROR("{} does not have a valid entrypoint".format(name))
 
 
-def load() -> Dict[str, Callable]:
+def load(plugins: List[str]) -> Dict[str, Callable]:
     """Load plugins discovered in the plugins directory.
 
     :return: A dictionary with a key of the plugin name and a value of the entrypoint.
     :rtype: Dict[str, Callable]
     """
-    DEBUG("Starting plugin loader.")
+    DEBUG("Starting plugin loader. Loading plugins: {}".format(plugins))
     discovered_plugins = {}
     for _, name, ispkg in pkgutil.iter_modules(path=["chirp/plugins"]):
-        if ispkg:
+        if ispkg and ((name in plugins) or ("all" in plugins)):
             _loader(name, discovered_plugins)
     DEBUG("Finished loading plugins.")
     return discovered_plugins

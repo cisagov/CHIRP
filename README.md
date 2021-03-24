@@ -83,13 +83,21 @@ with [Visual Studio Community](https://visualstudio.microsoft.com/vs/community/)
 ### From [release](https://github.com/cisagov/chirp/releases)
 
 ```console
+# defaults
 .\chirp.exe
+
+# with args
+.\chirp.exe -p registry -o chirp_result -l debug
 ```
 
 ### From python
 
 ```console
+# defaults
 python3 chirp.py
+
+# with args
+python3 chirp.py -p registry -o chirp_result -l debug
 ```
 
 ### Example output

@@ -7,7 +7,7 @@ from typing import Callable, Dict, Iterable, Iterator, List
 
 # cisagov Libraries
 from chirp import load
-from chirp.common import CRITICAL, DEBUG, ERROR, OUTPUT_DIR
+from chirp.common import CRITICAL, DEBUG, ERROR, OUTPUT_DIR, PLUGINS
 from chirp.plugins import events, loader, network, registry, yara  # noqa: F401
 
 
@@ -15,8 +15,8 @@ def run() -> None:
     """Run plugins and write out output."""
     if not os.path.exists(OUTPUT_DIR):
         os.mkdir(OUTPUT_DIR)
-    plugins = loader.load()
-    run_plugins(plugins)
+    loaded_plugins = loader.load(PLUGINS)
+    run_plugins(loaded_plugins)
 
 
 def run_plugins(plugins: Dict[str, Callable]) -> None:
@@ -72,7 +72,9 @@ def check_valid_indicator_types(
             yield indicator
             DEBUG("Loaded {}".format(indicator["name"]))
         else:
-            if indicator["ioc_type"] not in failed_types:
+            if (indicator["ioc_type"] in plugins or "all" in plugins) and indicator[
+                "ioc_type"
+            ] not in failed_types:
                 ERROR(
                     """Can't locate plugin "{}". It is possible it has not loaded due to an error.""".format(
                         indicator["ioc_type"]
