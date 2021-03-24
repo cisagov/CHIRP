@@ -72,8 +72,9 @@ def check_valid_indicator_types(
             yield indicator
             DEBUG("Loaded {}".format(indicator["name"]))
         else:
-            if ((indicator["ioc_type"] in plugins or "all" in plugins)
-            and indicator["ioc_type"] not in failed_types):
+            if (indicator["ioc_type"] in plugins or "all" in plugins) and indicator[
+                "ioc_type"
+            ] not in failed_types:
                 ERROR(
                     """Can't locate plugin "{}". It is possible it has not loaded due to an error.""".format(
                         indicator["ioc_type"]
