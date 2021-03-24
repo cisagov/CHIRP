@@ -10,12 +10,11 @@ from setuptools import setup
 def _get_platform():
     if sys.platform == "darwin":
         return "MacOS"
-    elif "win" in sys.platform:
+    if "win" in sys.platform:
         return "Windows"
-    elif sys.platform == "linux":
+    if sys.platform == "linux":
         return "Linux"
-    else:
-        return "UNSUPPORTED"
+    return "UNSUPPORTED"
 
 
 OS = _get_platform()

@@ -21,9 +21,8 @@ def _verify_privilege(plugin: Callable) -> bool:
         if ADMIN or not admin:
             INFO("Loaded {}".format(_parse_name(plugin)))
             return True
-        else:
-            ERROR("{} must be ran from an admin console.".format(_parse_name(plugin)))
-            return False
+        ERROR("{} must be ran from an admin console.".format(_parse_name(plugin)))
+        return False
     except AttributeError:
         INFO("Loaded {}".format(_parse_name(plugin)))
         return True

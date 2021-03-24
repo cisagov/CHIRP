@@ -55,19 +55,18 @@ def _get_platform():
     """Return a normalized platform name."""
     if sys.platform == "darwin":
         return "MacOS"
-    elif "win" in sys.platform:
+    if "win" in sys.platform:
         return "Windows"
-    elif sys.platform == "linux":
+    if sys.platform == "linux":
         return "Linux"
-    else:
-        return "UNSUPPORTED"
+    return "UNSUPPORTED"
 
 
 _CONSOLE = Console(record=True)
 
 _console_queue = queue.Queue()
 
-CONSOLE = lambda x: _console_queue.put(x)
+CONSOLE = _console_queue.put
 _INFO = lambda x: _console_queue.put("[green][+][/green] {}".format(x))
 _ERROR = lambda x: _console_queue.put("[red][-][/red] {}".format(x))
 _CRITICAL = lambda x: _console_queue.put("[cyan][!][/cyan] {}".format(x))

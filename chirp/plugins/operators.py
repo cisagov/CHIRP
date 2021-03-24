@@ -29,7 +29,7 @@ def OPERATOR_MAP(symbol: str) -> Union[Callable, None]:
         ERROR("Unknown symbol '{}'.".format(symbol))
 
 
-def navigate_structure(item: Dict[str, Any], keys: List[str] = []) -> Any:
+def navigate_structure(item: Dict[str, Any], keys: List[str] = None) -> Any:
     """Enumerate a nested dictionary to grab a subkey given a list of keys to traverse.
 
     :param item: The nested dictionary.
@@ -39,12 +39,13 @@ def navigate_structure(item: Dict[str, Any], keys: List[str] = []) -> Any:
     :return: The data at the given location.
     :rtype: Union[Dict[str, Any], None]
     """
+    if keys is None:
+        keys = []
     try:
         if keys:
             item = item[keys.pop(0)]
             return navigate_structure(item, keys)
-        else:
-            return item
+        return item
     except KeyError:
         return None
 
@@ -135,7 +136,7 @@ def searcher(check_value: Any, item: Any, key: Any = None) -> Union[bool, None]:
         if key and "." in key:
             search_item = navigate_structure(item, key.split("."))
             return searcher(check_value, search_item, None)
-        elif isinstance(item, dict):
+        if isinstance(item, dict):
             for _, v in item.items():
                 if not searcher(check_value, v, key):
                     continue

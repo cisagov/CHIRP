@@ -50,7 +50,7 @@ stream_handler.formatter = formatter
 logger.addHandler(stream_handler)
 
 # Additional fields for Splunk indexing
-fields = dict({})
+fields = {}
 
 global event_counter, error_counter
 
