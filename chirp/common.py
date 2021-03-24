@@ -14,7 +14,8 @@ from rich.console import Console
 from rich.traceback import install
 
 parser = argparse.ArgumentParser(
-    prog="CHIRP", description="CHIRP. A Window host forensic artifact collection tool.",
+    prog="CHIRP",
+    description="CHIRP. A Window host forensic artifact collection tool.",
 )
 parser.add_argument(
     "-o", "--output", help="Specified output directory.", default="output"
