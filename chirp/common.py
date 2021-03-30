@@ -29,9 +29,17 @@ parser.add_argument(
 parser.add_argument(
     "-p", "--plugins", nargs="*", help="Specified plugins to run.", default="all"
 )
+parser.add_argument(
+    "-t",
+    "--targets",
+    nargs="*",
+    help="Specified override filepath targets for yara plugin indicators.",
+    default=None,
+)
 ARGS, _ = parser.parse_known_args()
 OUTPUT_DIR = ARGS.output
 PLUGINS = ARGS.plugins
+TARGETS = ARGS.targets
 
 
 def _sinkhole(*args, **kwargs) -> None:
