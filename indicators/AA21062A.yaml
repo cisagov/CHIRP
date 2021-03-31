@@ -127,7 +127,7 @@ confidence: 10
 ioc_type: "events"
 indicator:
   event_type: "Windows Powershell"
-  event.event_data: "~= *ServerInfo~*/*"
+  event.event_data: "~= .*ServerInfo~.*/.*"
 ---
 name: "CVE-2021-26858"
 description: |
@@ -158,7 +158,7 @@ confidence: 8
 ioc_type: "events"
 indicator:
   event_type: "Application"
-  event.event_data: "~= *System.InvalidCastException*"
+  event.event_data: "~= .*System.InvalidCastException.*"
 ---
 name: "simpleseesharp : Webshell Unclassified"
 description: |
