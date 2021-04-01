@@ -7,7 +7,7 @@ import itertools
 import json
 import os
 import string
-from typing import Any, Dict, Iterator, Tuple, Union, List
+from typing import Any, Dict, Iterator, List, Tuple, Union
 
 # cisagov Libraries
 from chirp.common import CONSOLE, OS, OUTPUT_DIR, TARGETS, build_report
@@ -22,6 +22,7 @@ except ImportError:
     HAS_LIBS = False
 
 if OS == "Windows":
+    # Standard Python Libraries
     from ctypes import windll
 
 
@@ -39,6 +40,7 @@ def _get_drives() -> List[str]:
         bitmask >>= 1
 
     return drives
+
 
 def normalize_paths(path: str) -> Iterator[str]:
     """Normalize paths in the yara query.
