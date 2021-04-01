@@ -14,9 +14,6 @@ from chirp.common import CONSOLE, JSON, OS
 
 HAS_LIBS = False
 try:
-    # Standard Python Libraries
-    from ctypes import windll
-
     # cisagov Libraries
     from chirp.plugins.events.evtx2json import iter_evtx2xml, splunkify, xml2json
 
@@ -25,6 +22,10 @@ except ImportError:
     CONSOLE(
         "[red][!][/red] python-evtx, dict-toolbox, and xmljson are required dependencies for the events plugin. Please install requirements with pip."
     )
+
+if OS == "Windows":
+    # Standard Python Libraries
+    from ctypes import windll
 
 PATH = Path(sys.executable)
 
