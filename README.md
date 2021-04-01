@@ -87,7 +87,7 @@ with [Visual Studio Community](https://visualstudio.microsoft.com/vs/community/)
 .\chirp.exe
 
 # with args
-.\chirp.exe -p registry yara -t c:\\target_dir\\** -o chirp_result -l debug
+.\chirp.exe -p registry yara -t c:\\target_dir\\** -o chirp_result -l debug --non-interactive
 ```
 
 ### From python
@@ -97,7 +97,7 @@ with [Visual Studio Community](https://visualstudio.microsoft.com/vs/community/)
 python3 chirp.py
 
 # with args
-python3 chirp.py -p registry yara -t c:\\target_dir\\** -o chirp_result -l debug
+python3 chirp.py -p registry yara -t c:\\target_dir\\** -o chirp_result -l debug --non-interactive
 ```
 
 ### Example output
