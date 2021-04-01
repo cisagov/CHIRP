@@ -8,7 +8,7 @@ import time
 
 # cisagov Libraries
 from chirp import run
-from chirp.common import CONSOLE, ERROR, OUTPUT_DIR, save_log
+from chirp.common import CONSOLE, ERROR, OUTPUT_DIR, save_log, wait
 
 if __name__ == "__main__":
     try:
@@ -16,11 +16,11 @@ if __name__ == "__main__":
         run.run()
         time.sleep(2)
         CONSOLE(
-            "[green][+][/green] DONE! Your results can be found in {}. Press any key to exit.".format(
+            "[green][+][/green] DONE! Your results can be found in {}.".format(
                 os.path.abspath(OUTPUT_DIR)
             )
         )
-        input()
+        wait()
         save_log()
         sys.exit(0)
     except KeyboardInterrupt:

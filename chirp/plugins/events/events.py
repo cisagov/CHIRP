@@ -5,6 +5,7 @@ from functools import lru_cache
 import os
 from pathlib import Path
 import re
+import string
 import sys
 from typing import Any, Dict, Iterator, List, Union
 
@@ -22,17 +23,39 @@ except ImportError:
         "[red][!][/red] python-evtx, dict-toolbox, and xmljson are required dependencies for the events plugin. Please install requirements with pip."
     )
 
+if OS == "Windows":
+    # Standard Python Libraries
+    from ctypes import windll
+
 PATH = Path(sys.executable)
 
 
+def _get_drives() -> List[str]:
+    """
+    Return a list of valid drives.
+
+    Reference: `RichieHindle, StackOverflow <https://stackoverflow.com/a/827398>`_
+    """
+    drives = []
+    bitmask = windll.kernel32.GetLogicalDrives()
+    for letter in string.ascii_uppercase:
+        if bitmask & 1:
+            drives.append(letter)
+        bitmask >>= 1
+
+    return drives
+
+
 def _path_iterator():
-    dirs = ("Sysnative", "System32")
-    for letter in re.findall(
-        r"[A-Z]+:.*$", os.popen("mountvol /").read(), re.MULTILINE  # nosec
-    ):
-        for d in dirs:
-            if os.path.exists(letter + "\\Windows\\{}\\winevt\\Logs".format(d)):
-                return letter + "\\Windows\\{}\\winevt\\Logs\\".format(d) + "{}.evtx"
+    """Iterate over possible winevt paths to find valid winevts."""
+    if OS == "Windows":
+        dirs = ("Sysnative", "System32")
+        for letter in _get_drives():
+            for d in dirs:
+                if os.path.exists(letter + ":\\Windows\\{}\\winevt\\Logs".format(d)):
+                    return (
+                        letter + ":\\Windows\\{}\\winevt\\Logs\\".format(d) + "{}.evtx"
+                    )
     return None
 
 

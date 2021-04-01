@@ -6,8 +6,8 @@ from glob import glob
 import itertools
 import json
 import os
-import re
-from typing import Any, Dict, Iterator, Tuple, Union
+import string
+from typing import Any, Dict, Iterator, List, Tuple, Union
 
 # cisagov Libraries
 from chirp.common import CONSOLE, OS, OUTPUT_DIR, TARGETS, build_report
@@ -21,6 +21,26 @@ try:
 except ImportError:
     HAS_LIBS = False
 
+if OS == "Windows":
+    # Standard Python Libraries
+    from ctypes import windll
+
+
+def _get_drives() -> List[str]:
+    """
+    Return a list of valid drives.
+
+    Reference: `RichieHindle, StackOverflow <https://stackoverflow.com/a/827398>`_
+    """
+    drives = []
+    bitmask = windll.kernel32.GetLogicalDrives()
+    for letter in string.ascii_uppercase:
+        if bitmask & 1:
+            drives.append(letter)
+        bitmask >>= 1
+
+    return drives
+
 
 def normalize_paths(path: str) -> Iterator[str]:
     """Normalize paths in the yara query.
@@ -31,10 +51,8 @@ def normalize_paths(path: str) -> Iterator[str]:
     :rtype: Iterator[str]
     """
     if OS == "Windows" and path == "\\**":
-        for letter in re.findall(
-            r"[A-Z]+:.*$", os.popen("mountvol /").read(), re.MULTILINE  # nosec
-        ):
-            yield from normalize_paths(letter + "**")
+        for letter in _get_drives():
+            yield from normalize_paths(letter + ":\\**")
     elif "*" in path:
         yield from [p for p in glob(path, recursive=True) if os.path.exists(p)]
     if "," in path:

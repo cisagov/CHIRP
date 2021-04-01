@@ -36,6 +36,11 @@ parser.add_argument(
     help="Specified override filepath targets for yara plugin indicators.",
     default=None,
 )
+parser.add_argument(
+    "--non-interactive",
+    help="Run in non-interactive mode (close after completion)",
+    action="store_true",
+)
 ARGS, _ = parser.parse_known_args()
 OUTPUT_DIR = ARGS.output
 PLUGINS = ARGS.plugins
@@ -138,3 +143,17 @@ def build_report(indicator: dict) -> dict:
 def save_log() -> None:
     """Save the log output to `chirp.log`."""
     _CONSOLE.save_text("chirp.log")
+
+
+def wait() -> None:
+    """
+    Wait for a keypress to continue.
+
+    Reference: `CrouZ, StackOverflow <https://stackoverflow.com/a/16933120>`_
+    """
+    if not ARGS.non_interactive:
+        if OS == "Windows":
+            os.system("pause")  # nosec
+        else:
+            os.system('read -s -n 1 -p "Press any key to continue..."')  # nosec
+            print()
