@@ -103,12 +103,6 @@ def _get_platform():
         return "UNSUPPORTED"
 
 
-CONSOLE = lambda x: logging.warning(x)
-INFO = lambda x: logging.info(x)
-ERROR = lambda x: logging.error(x)
-CRITICAL = lambda x: logging.critical(x)
-DEBUG = lambda x: logging.debug(x)
-
 # https://github.com/python/typing/issues/182
 JSON = t.Union[str, int, float, bool, None, t.Mapping[str, "JSON"], t.List["JSON"]]
 
