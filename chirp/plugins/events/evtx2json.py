@@ -34,20 +34,7 @@ import xml.etree.ElementTree as ET  # nosec
 import Evtx.Evtx as evtx
 from xmljson import badgerfish as bf
 
-# cisagov Libraries
-from chirp.common import CONSOLE
-
-logger = logging.getLogger("evtx2json")
-logger.setLevel(logging.DEBUG)
-
-stream_handler = logging.StreamHandler()
-stream_handler.level = logging.INFO
-formatter = logging.Formatter(
-    fmt="%(asctime)s [%(name)10s] %(levelname)s %(message)s",
-    datefmt="%m/%d/%y %I:%M:%S %p",
-)
-stream_handler.formatter = formatter
-logger.addHandler(stream_handler)
+logger = logging.getLogger()
 
 # Additional fields for Splunk indexing
 fields = dict({})
@@ -169,9 +156,7 @@ def iter_evtx2xml(evtx_file):
     except Exception as err:
         raise
     if error_counter:
-        CONSOLE(
-            "[cyan][evtx2json][/cyan] Failed to read {} events.".format(error_counter)
-        )
+        logging.error("Failed to read {} events.".format(error_counter))
 
 
 def _transform_system(output):

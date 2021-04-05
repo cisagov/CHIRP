@@ -2,12 +2,13 @@
 
 # Standard Python Libraries
 import asyncio
+import logging
 import os
 from typing import Callable, Dict, Iterable, Iterator, List
 
 # cisagov Libraries
 from chirp import load
-from chirp.common import CRITICAL, DEBUG, ERROR, OUTPUT_DIR, PLUGINS
+from chirp.common import OUTPUT_DIR, PLUGINS
 from chirp.plugins import events, loader, network, registry, yara  # noqa: F401
 
 
@@ -70,12 +71,12 @@ def check_valid_indicator_types(
     for indicator in indicator_generator:
         if indicator["ioc_type"] in plugins:
             yield indicator
-            DEBUG("Loaded {}".format(indicator["name"]))
+            logging.debug("Loaded {}".format(indicator["name"]))
         else:
             if (indicator["ioc_type"] in plugins or "all" in plugins) and indicator[
                 "ioc_type"
             ] not in failed_types:
-                ERROR(
+                logging.error(
                     """Can't locate plugin "{}". It is possible it has not loaded due to an error.""".format(
                         indicator["ioc_type"]
                     )
@@ -95,6 +96,6 @@ def get_indicators() -> Iterator[str]:
             if "README" not in f and f.split(".")[-1] in ("yaml", "yml"):
                 yield os.path.join("indicators", f)
     except FileNotFoundError:
-        CRITICAL(
+        logging.error(
             "Could not find an indicators directory. Indicators should be in the same directory as this executable."
         )

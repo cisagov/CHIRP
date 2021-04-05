@@ -2,11 +2,12 @@
 
 # Standard Python Libraries
 import importlib
+import logging
 import pkgutil
 from typing import Callable, Dict, List
 
 # cisagov Libraries
-from chirp.common import ADMIN, DEBUG, ERROR, INFO, OS
+from chirp.common import ADMIN, OS
 
 
 def _parse_name(plugin: Callable) -> str:
@@ -19,13 +20,15 @@ def _verify_privilege(plugin: Callable) -> bool:
     try:
         admin = plugin.REQUIRED_ADMIN
         if ADMIN or not admin:
-            INFO("Loaded {}".format(_parse_name(plugin)))
+            logging.info("Loaded {}".format(_parse_name(plugin)))
             return True
         else:
-            ERROR("{} must be ran from an admin console.".format(_parse_name(plugin)))
+            logging.error(
+                "{} must be ran from an admin console.".format(_parse_name(plugin))
+            )
             return False
     except AttributeError:
-        INFO("Loaded {}".format(_parse_name(plugin)))
+        logging.info("Loaded {}".format(_parse_name(plugin)))
         return True
 
 
@@ -37,7 +40,7 @@ def _str_load(
         if _verify_privilege(pkg):
             discovered_plugins[name] = pkg.entrypoint
     else:
-        ERROR("{} must be ran on {}".format(name, pkg.REQUIRED_OS))
+        logging.error("{} must be ran on {}".format(name, pkg.REQUIRED_OS))
 
 
 def _iter_load(
@@ -50,12 +53,12 @@ def _iter_load(
         if _verify_privilege(pkg):
             discovered_plugins[name] = pkg.entrypoint
     else:
-        ERROR("{} must be ran on {}".format(name, " or ".join(pkg.REQUIRED_OS)))
+        logging.error("{} must be ran on {}".format(name, " or ".join(pkg.REQUIRED_OS)))
 
 
 def _loader(name: str, discovered_plugins: Dict[str, Callable]) -> None:
     """Load discovered plugins in the ./plugins directory."""
-    INFO("Found {}".format(name))
+    logging.info("Found {}".format(name))
     pkg = importlib.import_module("chirp.plugins.{}".format(name))
     try:
         if not hasattr(pkg.entrypoint, "__call__"):
@@ -66,14 +69,14 @@ def _loader(name: str, discovered_plugins: Dict[str, Callable]) -> None:
             elif isinstance(pkg.REQUIRED_OS, (tuple, list)):
                 _iter_load(name, pkg, discovered_plugins)
             else:
-                ERROR(
+                logging.error(
                     "Not sure how to interpret REQUIRED_OS for plugin {}".format(name)
                 )
         except AttributeError:
             if _verify_privilege(pkg):
                 discovered_plugins[name] = pkg.entrypoint
     except AttributeError:
-        ERROR("{} does not have a valid entrypoint".format(name))
+        logging.error("{} does not have a valid entrypoint".format(name))
 
 
 def load(plugins: List[str]) -> Dict[str, Callable]:
@@ -82,10 +85,10 @@ def load(plugins: List[str]) -> Dict[str, Callable]:
     :return: A dictionary with a key of the plugin name and a value of the entrypoint.
     :rtype: Dict[str, Callable]
     """
-    DEBUG("Starting plugin loader. Loading plugins: {}".format(plugins))
+    logging.debug("Starting plugin loader. Loading plugins: {}".format(plugins))
     discovered_plugins = {}
     for _, name, ispkg in pkgutil.iter_modules(path=["chirp/plugins"]):
         if ispkg and ((name in plugins) or ("all" in plugins)):
             _loader(name, discovered_plugins)
-    DEBUG("Finished loading plugins.")
+    logging.debug("Finished loading plugins.")
     return discovered_plugins

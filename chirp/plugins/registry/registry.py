@@ -1,10 +1,8 @@
 """Provides methods for parsing and retrieving registry entries."""
 
 # Standard Python Libraries
+import logging
 from typing import Iterator, Tuple
-
-# cisagov Libraries
-from chirp.common import CONSOLE
 
 HAS_LIBS = False
 try:
@@ -14,7 +12,6 @@ try:
     HAS_LIBS = True
 except ImportError:
     pass
-
 
 if HAS_LIBS:
 
@@ -80,7 +77,7 @@ if HAS_LIBS:
         """
         hive, key = _normalize_key(hkey)
         if not hive or not key:
-            CONSOLE("[red][!][/red] Unable to read key '{}'".format(hkey))
+            logging.log(61, "Unable to read key '{}'".format(hkey))
             return
         registry = winreg.ConnectRegistry(None, hive)
         try:
@@ -93,7 +90,7 @@ if HAS_LIBS:
                         "registry_type": REGISTRY_VALUE_TYPES[value_tuple[2]],
                     }
         except FileNotFoundError:
-            CONSOLE("[cyan][REGISTRY][/cyan] Key {} does not exist.".format(hkey))
+            logging.log(61, "Key {} does not exist.".format(hkey))
 
 
 else:
@@ -106,5 +103,5 @@ else:
         :yield: Literally "ERROR"
         :rtype: Iterator[str]
         """
-        CONSOLE("[red][!][/red] Registry plugin is only compatible with Windows.")
+        logging.log(61, "Registry plugin is only compatible with Windows.")
         yield "ERROR"
