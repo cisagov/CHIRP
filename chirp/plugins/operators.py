@@ -2,11 +2,9 @@
 
 # Standard Python Libraries
 from functools import lru_cache
+import logging
 import re
 from typing import Any, Callable, Dict, List, Tuple, Union
-
-# cisagov Libraries
-from chirp.common import ERROR
 
 
 @lru_cache(maxsize=128)
@@ -26,7 +24,7 @@ def OPERATOR_MAP(symbol: str) -> Union[Callable, None]:
     try:
         return d[symbol]
     except KeyError:
-        ERROR("Unknown symbol '{}'.".format(symbol))
+        logging.error("(OPERATORS) Unknown symbol '{}'.".format(symbol))
 
 
 def navigate_structure(item: Dict[str, Any], keys: List[str] = []) -> Any:
@@ -61,8 +59,8 @@ def parse_operator_and_operand(search_string: str) -> Union[Tuple[Any, Any], Non
     try:
         s = search_string.split(" ")
     except AttributeError:
-        ERROR(
-            "search string '{}' appears to be the wrong data type.".format(
+        logging.error(
+            "(OPERATORS) search string '{}' appears to be the wrong data type.".format(
                 search_string
             )
         )
@@ -71,7 +69,9 @@ def parse_operator_and_operand(search_string: str) -> Union[Tuple[Any, Any], Non
         operator = OPERATOR_MAP(s[0])
         operand = " ".join(s[1:])
     except IndexError:
-        ERROR("Did not receive a parseable string! '{}'".format(search_string))
+        logging.error(
+            "(OPERATORS) Did not receive a parseable string! '{}'".format(search_string)
+        )
         return
     if operand in NONE_TYPES:
         operand = ""

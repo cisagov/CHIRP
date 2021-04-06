@@ -2,6 +2,7 @@
 
 # Standard Python Libraries
 from functools import lru_cache
+import logging
 import os
 from pathlib import Path
 import re
@@ -10,7 +11,7 @@ import sys
 from typing import Any, Dict, Iterator, List, Union
 
 # cisagov Libraries
-from chirp.common import CONSOLE, JSON, OS
+from chirp.common import JSON, OS
 
 HAS_LIBS = False
 try:
@@ -19,8 +20,8 @@ try:
 
     HAS_LIBS = True
 except ImportError:
-    CONSOLE(
-        "[red][!][/red] python-evtx, dict-toolbox, and xmljson are required dependencies for the events plugin. Please install requirements with pip."
+    logging.error(
+        "(EVENTS) python-evtx, dict-toolbox, and xmljson are required dependencies for the events plugin. Please install requirements with pip."
     )
 
 if OS == "Windows":
@@ -63,9 +64,7 @@ default_dir = _path_iterator()
 
 if not default_dir:
     if OS == "Windows":
-        CONSOLE(
-            "[red][!][/red] We can't find windows event logs at their standard path."
-        )
+        logging.log(60, "We can't find windows event logs at their standard path.")
     HAS_LIBS = False
 
 

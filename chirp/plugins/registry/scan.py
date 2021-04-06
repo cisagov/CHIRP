@@ -2,11 +2,12 @@
 
 # Standard Python Libraries
 import json
+import logging
 import os
 from typing import Dict, List, Tuple, Union
 
 # cisagov Libraries
-from chirp.common import CONSOLE, OUTPUT_DIR, build_report
+from chirp.common import OUTPUT_DIR, build_report
 from chirp.plugins import operators
 from chirp.plugins.registry.registry import enumerate_registry_values
 
@@ -43,10 +44,8 @@ async def check_matches(
 
 async def _report_hits(indicator: str, vals: dict) -> None:
     """Write to the log the number of hits for a given indicator."""
-    CONSOLE(
-        "[cyan][REGISTRY][/cyan] Found {} hit(s) for {} indicator.".format(
-            len(vals["matches"]), indicator
-        )
+    logging.log(
+        61, "Found {} hit(s) for {} indicator.".format(len(vals["matches"]), indicator)
     )
 
 
@@ -58,15 +57,15 @@ async def run(indicators: dict) -> None:
     """
     if not indicators:
         return
-    CONSOLE("[cyan][REGISTRY][/cyan] Entered registry plugin.")
+    logging.debug("(REGISTRY) Entered registry plugin.")
     report = {indicator["name"]: build_report(indicator) for indicator in indicators}
     for indicator in indicators:
         ind = indicator["indicator"]
         indicator_list = [(k, v) for k, v in ind.items() if k != "registry_key"]
-        CONSOLE("[cyan][REGISTRY][/cyan] Reading {}".format(ind["registry_key"]))
+        logging.log(61, "Reading {}".format(ind["registry_key"]))
         async for value in enumerate_registry_values(ind["registry_key"]):
             if value == "ERROR":
-                CONSOLE("[cyan][REGISTRY][/cyan] Hit an error, exiting.")
+                logging.log(61, "Hit an error, exiting.")
                 return
             hits, search_criteria, match = await check_matches(indicator_list, value)
             if hits != len(indicator_list):

@@ -3,15 +3,14 @@
 # Standard Python Libraries
 import argparse
 import ctypes
+import logging
 import os
-import queue
 import sys
-import threading
 import typing as t
 
 # Third-Party Libraries
 from rich.console import Console
-from rich.traceback import install
+from rich.logging import RichHandler
 
 parser = argparse.ArgumentParser(
     prog="CHIRP",
@@ -19,12 +18,6 @@ parser = argparse.ArgumentParser(
 )
 parser.add_argument(
     "-o", "--output", help="Specified output directory.", default="output"
-)
-parser.add_argument(
-    "-l",
-    "--log-level",
-    help="Log level. Info, Error, Critical, or Debug.",
-    default="silent",
 )
 parser.add_argument(
     "-p", "--plugins", nargs="*", help="Specified plugins to run.", default="all"
@@ -38,18 +31,52 @@ parser.add_argument(
 )
 parser.add_argument(
     "--non-interactive",
-    help="Run in non-interactive mode (close after completion)",
+    help="Run in non-interactive mode (close after completion).",
     action="store_true",
+)
+parser.add_argument(
+    "--silent",
+    help="Silence CHIRP output.",
+    action="store_true",
+)
+parser.add_argument(
+    "-v",
+    "--verbose",
+    action="count",
+    default=0,
+    help="program verbosity, use more `v`s to increase verbosity, default is no verbosity.",
 )
 ARGS, _ = parser.parse_known_args()
 OUTPUT_DIR = ARGS.output
 PLUGINS = ARGS.plugins
 TARGETS = ARGS.targets
 
+if ARGS.verbose >= 2:
+    LOG_LEVEL = logging.NOTSET
+elif ARGS.verbose == 1:
+    LOG_LEVEL = logging.INFO
+else:
+    LOG_LEVEL = logging.ERROR
 
-def _sinkhole(*args, **kwargs) -> None:
-    """Drop any input and return nothing."""
-    pass
+if ARGS.silent:
+    LOG_LEVEL = 100
+
+_CONSOLE = Console(record=True)
+
+logging.basicConfig(
+    level=LOG_LEVEL,
+    format="%(message)s",
+    datefmt="%X",
+    handlers=[
+        RichHandler(rich_tracebacks=True, tracebacks_show_locals=True, console=_CONSOLE)
+    ],
+)
+
+logging.addLevelName(60, "EVENTS")
+logging.addLevelName(61, "REGISTRY")
+logging.addLevelName(62, "YARA")
+logging.addLevelName(63, "NETWORK")
+logging.addLevelName(70, "COMPLETE")
 
 
 def _is_admin():
@@ -76,55 +103,11 @@ def _get_platform():
         return "UNSUPPORTED"
 
 
-_CONSOLE = Console(record=True)
-
-_console_queue = queue.Queue()
-
-CONSOLE = lambda x: _console_queue.put(x)
-_INFO = lambda x: _console_queue.put("[green][+][/green] {}".format(x))
-_ERROR = lambda x: _console_queue.put("[red][-][/red] {}".format(x))
-_CRITICAL = lambda x: _console_queue.put("[cyan][!][/cyan] {}".format(x))
-_DEBUG = lambda x: _console_queue.put("[yellow][?][/yellow] {}".format(x))
-
-"""
-A workaround to log levels, gives us greater control in the main program.
-This mapping allows the user to specify a log level (debug, critical, error, info, silent).
-Based on the user input, functions are returned matching the desired output,
-sinkhole() is as it sounds, a method to capture input and output nothing,
-which effectively allows us to void calls like ERROR("some error text") as
-sinkhole will capture the input and return None.
-"""
-log_levels = {
-    "debug": [_INFO, _ERROR, _CRITICAL, _DEBUG],
-    "critical": [_INFO, _ERROR, _CRITICAL, _sinkhole],
-    "error": [_INFO, _ERROR, _sinkhole, _sinkhole],
-    "info": [_INFO, _sinkhole, _sinkhole, _sinkhole],
-    "silent": [_sinkhole, _sinkhole, _sinkhole, _sinkhole],
-}
-
-INFO, ERROR, CRITICAL, DEBUG = log_levels[ARGS.log_level.lower()]
-
 # https://github.com/python/typing/issues/182
 JSON = t.Union[str, int, float, bool, None, t.Mapping[str, "JSON"], t.List["JSON"]]
 
 ADMIN = _is_admin()
 OS = _get_platform()
-
-# Install traceback handler
-install()
-
-
-def _logger():
-    """Use a queue to prevent async functions from writing to the console at the same time. Sleep for 2 seconds then checks if there is data to write out."""
-    if _console_queue:
-        while not _console_queue.empty():
-            _CONSOLE.log(_console_queue.get())
-    _thread = threading.Timer(interval=2, function=_logger)
-    _thread.daemon = True
-    _thread.start()
-
-
-_logger()
 
 
 def build_report(indicator: dict) -> dict:
