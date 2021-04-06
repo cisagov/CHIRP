@@ -2,11 +2,12 @@
 
 # Standard Python Libraries
 import json
+import logging
 import os
 from typing import List
 
 # cisagov Libraries
-from chirp.common import CONSOLE, ERROR, OUTPUT_DIR, build_report
+from chirp.common import OUTPUT_DIR, build_report
 from chirp.plugins.network.network import (
     grab_dns,
     grab_netstat,
@@ -38,7 +39,7 @@ async def run(indicators: dict) -> None:
         return
 
     hits = 0
-    CONSOLE("[cyan][NETWORK][/cyan] Entered network plugin.")
+    logging.debug("Entered network plugin.")
     saved_ns = parse_netstat(grab_netstat())
     saved_dns = parse_dns(grab_dns())
 
@@ -51,11 +52,12 @@ async def run(indicators: dict) -> None:
                     report[indicator["name"]]["matches"].append(ioc)
                     hits += 1
         except KeyError:
-            ERROR("{} appears to be malformed.".format(indicator))
-    CONSOLE(
-        "[cyan][NETWORK][/cyan] Read {} records, found {} IoC hits.".format(
+            logging.log(63, "{} appears to be malformed.".format(indicator))
+    logging.log(
+        63,
+        "Read {} records, found {} IoC hits.".format(
             len(saved_dns) + len(saved_ns), hits
-        )
+        ),
     )
 
     with open(os.path.join(OUTPUT_DIR, "network.json"), "w+") as writeout:

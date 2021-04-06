@@ -1,0 +1,294 @@
+##########################################################
+# CHIRP IOC indicator file based on CISA Alert AA21-062A #
+#     https://us-cert.cisa.gov/ncas/alerts/aa21-062a     #
+##########################################################
+---
+name: "IP addresesses related to possible Hafnium activity"
+description: |
+  "Volexity has seen attackers leverage the following IP addresses. Although these are tied to virtual private servers (VPSs) servers and virtual private networks (VPNs),"
+  "responders should investigate these IP addresses on their networks and act accordingly"
+  "https://www.volexity.com/blog/2021/03/02/active-exploitation-of-microsoft-exchange-zero-day-vulnerabilities/"
+confidence: 3
+ioc_type: "network"
+indicator:
+  ips: |
+    103.77.192.219
+    104.140.114.110
+    104.250.191.110
+    108.61.246.56
+    149.28.14.163
+    157.230.221.198
+    167.99.168.251
+    185.250.151.72
+    192.81.208.169
+    203.160.69.66
+    211.56.98.146
+    5.2.69.14
+    5.254.43.18
+    80.92.205.81
+    91.192.103.43
+---
+name: "XML SOAP POST requests for unauthenticated execution : RCE"
+description: |
+  "Volexity has observed this attack conducted via OWA. The exploit involved specially crafted POST requests being sent to a valid static resources that does"
+  "not require authentication. Specifically, Volexity has observed POST requests targeting files found on the following web directory"
+  "https://www.volexity.com/blog/2021/03/02/active-exploitation-of-microsoft-exchange-zero-day-vulnerabilities/"
+confidence: 7
+ioc_type: "yara"
+indicator:
+  files: "C:\\inetpub\\logs\\LogFiles\\W3SVC*\\*.log"
+  rule: |
+    rule unauthenticated_execution
+    {
+      meta:
+        cve= "CVE-2021-26858"
+      strings:
+        $post1= "POST /owa/auth/Current/themes/resources/logon.css"
+        $post2= "POST /owa/auth/Current/themes/resources/owafont_ja.css"
+        $post3= "POST /owa/auth/Current/themes/resources/lgnbotl.gif"
+        $post4= "POST /owa/auth/Current/themes/resources/owafont_ko.css"
+        $post5= "POST /owa/auth/Current/themes/resources/SegoeUI-SemiBold.eot"
+        $post6= "POST /owa/auth/Current/themes/resources/SegoeUI-SemiLight.ttf"
+        $post7= "POST /owa/auth/Current/themes/resources/lgnbotl.gif"
+        $post8= "POST /owa/auth/Current/"
+        $post9= "POST /ecp/default.flt"
+        $post10= "POST /ecp/main.css"
+        $post11= /POST \/ecp\/\b\w{1}\b.js/
+
+      condition:
+
+        any of ($post*)
+    }
+---
+name: "Malicious URL User-Agents"
+description: |
+  "There are also a handful of User-Agent that may be useful for responders to look for when examining their web logs."
+  "These are not necessarily indicative of compromise, but should be used to determine if further investigation."
+  "Volexity observed the following non-standard User-Agents associated with POST requests to the files found under folders within /owa/auth/Current."
+  "Discovered by Volexity - (https://www.volexity.com/blog/2021/03/02/active-exploitation-of-microsoft-exchange-zero-day-vulnerabilities/)"
+confidence: 7
+ioc_type: "yara"
+indicator:
+  files: "C:\\inetpub\\logs\\LogFiles\\W3SVC*\\*.log"
+  rule: |
+    rule ecp_user_agents
+    {
+      strings:
+        $ua1= "ExchangeServicesClient/0.0.0.0"
+        $ua2= "python-requests/2.19.1"
+        $ua3= "python-requests/2.25.1"
+        $ua4= "DuckDuckBot/1.0;+(+http://duckduckgo.com/duckduckbot.html)"
+        $ua5= "facebookexternalhit/1.1+(+http://www.facebook.com/externalhit_uatext.php)"
+        $ua6= "Mozilla/5.0+(compatible;+Baiduspider/2.0;++http://www.baidu.com/search/spider.html)"
+        $ua7= "Mozilla/5.0+(compatible;+Bingbot/2.0;++http://www.bing.com/bingbot.htm)"
+        $ua8= "Mozilla/5.0+(compatible;+Googlebot/2.1;++http://www.google.com/bot.html"
+        $ua9= "Mozilla/5.0+(compatible;+Konqueror/3.5;+Linux)+KHTML/3.5.5+(like+Gecko)+(Exabot-Thumbnails)"
+        $ua10= "Mozilla/5.0+(compatible;+Yahoo!+Slurp;+http://help.yahoo.com/help/us/ysearch/slurp)"
+        $ua11= "Mozilla/5.0+(compatible;+YandexBot/3.0;++http://yandex.com/bots)"
+        $ua12= "Mozilla/5.0+(X11;+Linux+x86_64)+AppleWebKit/537.36+(KHTML,+like+Gecko)+Chrome/51.0.2704.103+Safari/537.36"
+        $ua13= "antSword/v2.1"
+        $ua14= "Googlebot/2.1+(+http://www.googlebot.com/bot.html)"
+        $ua15= "Mozilla/5.0+(compatible;+Baiduspider/2.0;++http://www.baidu.com/search/spider.html)"
+
+      condition:
+        any of ($ua*)
+    }
+---
+name: "RCE via OAB VD cmdlet"
+description: |
+  "OAB External Access (https://www.microsoft.com/security/blog/2021/03/02/hafnium-targeting-exchange-servers/)"
+  "A remote code execution (RCE) exploit was also observed in use against multiple organizations. This RCE appears to reside within the use of the"
+  "Set-OabVirtualDirectory ExchangePowerShell cmdlet. Evidence of this activity can be seen in Exchange's ECP Server logs."
+  "Discovered by Volexity - "https://www.volexity.com/blog/2021/03/02/active-exploitation-of-microsoft-exchange-zero-day-vulnerabilities/"
+confidence: 8
+ioc_type: "yara"
+indicator:
+  files: "C:\\Program Files\\Microsoft\\Exchange Server\\V15\\Logging\\ECP\\Server\\*.LOG"
+  rule: |
+    rule unauthenticated_execution
+    {
+      meta:
+        cve= "CVE-2021-27065"
+        description= "CVE-2021-27065 exploitation can be detected via Exchange log files"
+        reference= "https://www.microsoft.com/security/blog/2021/03/02/hafnium-targeting-exchange-servers/"
+      strings:
+
+      $req= "S:CMD=Set-OabVirtualDirectory.ExternalUrl='"
+
+      condition:
+
+      any of ($req)
+    }
+---
+name: "Possible CVE-2021-26855 Exploitation"
+description: |
+  "IoC for the exploitation of CVE-2021-26855"
+confidence: 10
+ioc_type: "events"
+indicator:
+  event_type: "Windows Powershell"
+  event.event_data: "~= .*ServerInfo~.*/.*"
+---
+name: "CVE-2021-26858"
+description: |
+  "CVE-2021-26858 exploitation can be detected via the Exchange log file"
+  "https://www.microsoft.com/security/blog/2021/03/02/hafnium-targeting-exchange-servers/"
+confidence: 10
+ioc_type: "yara"
+indicator:
+  files: "C:\\Program Files\\Microsoft\\Exchange Server\\V15\\Logging\\OABGeneratorLog\\*.log"
+  rule: |
+    rule cve_2021_26858_detection
+    {
+      meta:
+        description= "Exploitation of CVE-2021-26858 can be detected by downloaded files located in non-standard paths"
+        source= "https://www.microsoft.com/security/blog/2021/03/02/hafnium-targeting-exchange-servers/"
+
+      strings:
+        $str1= "Download failed and temporary file"
+      condition:
+        any of ($str1)
+    }
+---
+name: "Possible CVE-2021-26857 Exploitation"
+description: |
+  "CVE-2021-26857 exploitation can be detected via the Windows Application event logs."
+  "Source - https://www.microsoft.com/security/blog/2021/03/02/hafnium-targeting-exchange-servers/"
+confidence: 8
+ioc_type: "events"
+indicator:
+  event_type: "Application"
+  event.event_data: "~= .*System.InvalidCastException.*"
+---
+name: "simpleseesharp : Webshell Unclassified"
+description: |
+  "Unclassified Webshell detection originally discovered by Volexity"
+confidence: 9
+ioc_type: "yara"
+indicator:
+  files: "\\**"
+  rule: |
+    rule webshell_aspx_simpleseesharp : Webshell Unclassified
+    {
+
+    meta:
+
+    author= "threatintel@volexity.com"
+    date= "2021-03-01"
+    description= "A simple ASPX Webshell that allows an attacker to write further files to disk."
+    hash= "893cd3583b49cb706b3e55ecb2ed0757b977a21f5c72e041392d1256f31166e2"
+    reference = "https://www.volexity.com/blog/2021/03/02/active-exploitation-of-microsoft-exchange-zero-day-vulnerabilities/"
+
+
+
+    strings:
+
+    $header= "<%@ Page Language=\"C#\" %>"
+    $body= "<% HttpPostedFile thisFile = Request.Files[0];thisFile.SaveAs(Path.Combine"
+
+
+
+    condition:
+
+    $header at 0 and
+    $body and
+    filesize < 1KB
+
+    }
+---
+name: "reGeorgTunnel : Webshell Commodity"
+description: |
+  "Webshell detection originally discovered by Volexity"
+confidence: 9
+ioc_type: "yara"
+indicator:
+  files: "\\**"
+  rule: |
+    rule webshell_aspx_reGeorgTunnel : Webshell Commodity
+    {
+    meta:
+    author= "threatintel@volexity.com"
+    date= "2021-03-01"
+    description= "variation on reGeorgtunnel"
+    hash= "406b680edc9a1bb0e2c7c451c56904857848b5f15570401450b73b232ff38928"
+    reference= "https://github.com/sensepost/reGeorg/blob/master/tunnel.aspx"
+    strings:
+    $s1= "System.Net.Sockets"
+    $s2= "System.Text.Encoding.Default.GetString(Convert.FromBase64String(StrTr(Request.Headers.Get"
+    $t1 = ".Split('|')"
+    $t2= "Request.Headers.Get"
+    $t3= ".Substring("
+    $t4= "new Socket("
+    $t5= "IPAddress ip;"
+    condition:
+    all of ($s*) or
+    all of ($t*)
+    }
+---
+name: "sportsball : Webshell"
+description: |
+  "Webshell detection originally discovered by Volexity"
+confidence: 9
+ioc_type: "yara"
+indicator:
+  files: "\\**"
+  rule: |
+    rule webshell_aspx_sportsball : Webshell
+    {
+
+    meta:
+
+    author= "threatintel@volexity.com"
+    date= "2021-03-01"
+    description= "The SPORTSBALL webshell allows attackers to upload files or execute commands on the system."
+    hash= "2fa06333188795110bba14a482020699a96f76fb1ceb80cbfa2df9d3008b5b0a"
+    reference = "https://www.volexity.com/blog/2021/03/02/active-exploitation-of-microsoft-exchange-zero-day-vulnerabilities/"
+
+
+
+    strings:
+
+    $uniq1= "HttpCookie newcook = new HttpCookie(\"fqrspt\", HttpContext.Current.Request.Form"
+    $uniq2= "ZN2aDAB4rXsszEvCLrzgcvQ4oi5J1TuiRULlQbYwldE="
+
+
+
+    $var1= "Result.InnerText = string.Empty;"
+    $var2= "newcook.Expires = DateTime.Now.AddDays("
+    $var3= "System.Diagnostics.Process process = new System.Diagnostics.Process()"
+    $var4= "process.StandardInput.WriteLine(HttpContext.Current.Request.Form[\""
+    $var5= "else if (!string.IsNullOrEmpty(HttpContext.Current.Request.Form[\""
+    $var6= "<input type=\"submit\" value=\"Upload\" />"
+
+
+
+    condition:
+
+    any of ($uniq*) or
+    all of ($var*)
+
+    }
+---
+name: "Detection for the use of procdump to dump LSASS process memory."
+description: |
+  "LSASS memory dump using procdump, which was seen by Hafnium operators"
+confidence: 8
+ioc_type: "yara"
+indicator:
+  files: "\\**"
+  rule: |
+    rule lsass_process_memory_dump
+    {
+     meta:
+      author= "Microsoft Threat Intelligence Center (MSTIC),  Microsoft 365 Defender Threat Intelligence Team and  Microsoft 365 Security "
+      date= "2021-03-03"
+      reference= "https://www.microsoft.com/security/blog/2021/03/02/hafnium-targeting-exchange-servers/"
+
+     strings:
+      $s1= "lsass.exe C:\\windows\\temp\\lsass"
+      $s2= "C:\\ProgramData\\it.zip"
+      $s3= "powercat.ps1'); powercat -c"
+
+     condition:
+      any of ($s*)
+     }

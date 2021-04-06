@@ -2,6 +2,7 @@
 
 # Standard Python Libraries
 import json
+import logging
 import os
 from typing import Dict, List, Tuple, Union
 
@@ -9,7 +10,7 @@ from typing import Dict, List, Tuple, Union
 import aiomultiprocess as aiomp
 
 # cisagov Libraries
-from chirp.common import CONSOLE, OUTPUT_DIR, build_report
+from chirp.common import OUTPUT_DIR, build_report
 from chirp.plugins import operators
 from chirp.plugins.events.events import gather
 
@@ -65,14 +66,10 @@ async def _run(run_args):
         report,
         num_logs,
     ) = run_args  # Unpack our arguments (bundled to passthrough for multiprocessing)
-    CONSOLE(
-        "[cyan][EVENTS][/cyan] Reading {} event logs.".format(
-            event_type.split("%4")[-1]
-        )
-    )
+    logging.log(60, "Reading {} event logs.".format(event_type.split("%4")[-1]))
     async for event_log in gather(event_type):  # Iterate over event logs
         if event_log == "ERROR":
-            CONSOLE("[cyan][EVENTS][/cyan] Hit an error, exiting.")
+            logging.log(60, "Hit an error, exiting.")
             return
         if event_log:
             num_logs += 1
@@ -117,7 +114,7 @@ async def run(indicators: dict) -> None:
         return
     hits = 0
     num_logs = 0
-    CONSOLE("[cyan][EVENTS][/cyan] Entered events plugin.")
+    logging.debug("Entered events plugin.")
     event_types = {indicator["indicator"]["event_type"] for indicator in indicators}
     report = {indicator["name"]: build_report(indicator) for indicator in indicators}
     run_args = [
@@ -138,9 +135,7 @@ async def run(indicators: dict) -> None:
             pass
 
     hits = sum(len(v["matches"]) for _, v in report.items())
-    CONSOLE(
-        "[cyan][EVENTS][/cyan] Read {} logs, found {} matches.".format(num_logs, hits)
-    )
+    logging.log(60, "Read {} logs, found {} matches.".format(num_logs, hits))
     with open(os.path.join(OUTPUT_DIR, "events.json"), "w+") as writeout:
         writeout.write(
             json.dumps({r: report[r] for r in report if report[r]["matches"]})

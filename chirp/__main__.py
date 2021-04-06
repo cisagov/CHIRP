@@ -1,6 +1,7 @@
 """Main method for CHIRP (Used when compiled)."""
 
 # Standard Python Libraries
+import logging
 from multiprocessing import freeze_support
 import os
 import sys
@@ -8,22 +9,23 @@ import time
 
 # cisagov Libraries
 from chirp import run
-from chirp.common import CONSOLE, ERROR, OUTPUT_DIR, save_log
+from chirp.common import OUTPUT_DIR, save_log, wait
 
 if __name__ == "__main__":
     try:
         freeze_support()
         run.run()
         time.sleep(2)
-        CONSOLE(
-            "[green][+][/green] DONE! Your results can be found in {}. Press any key to exit.".format(
+        logging.log(
+            70,
+            "DONE! Your results can be found in {}.".format(
                 os.path.abspath(OUTPUT_DIR)
-            )
+            ),
         )
-        input()
+        wait()
         save_log()
         sys.exit(0)
     except KeyboardInterrupt:
-        ERROR("Received an escape sequence. Goodbye.")
+        logging.error("Received an escape sequence. Goodbye.")
         save_log()
         sys.exit(0)

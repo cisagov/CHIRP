@@ -15,10 +15,16 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           version_scheme: semantic
 
+      - name: Setup Python
+        uses: actions/setup-python@v2.2.1
+        with:
+          python-version: 3.8
+          architecture: x64
+
       - name: Compile
         run: |
-          py -m pip install -e .
-          py -m nuitka --onefile chirp.py --windows-onefile-tempdir --plugin-enable=multiprocessing --plugin-enable=pylint-warnings --windows-uac-admin --assume-yes-for-downloads --windows-icon-from-ico=.\assets\CISA_Logo.ico
+          python -m pip install -e .
+          python -m nuitka --onefile chirp.py --windows-onefile-tempdir --plugin-enable=multiprocessing --plugin-enable=pylint-warnings --windows-uac-admin --assume-yes-for-downloads --windows-icon-from-ico=.\assets\CISA_Logo.ico --msvc=14.2
 
       - name: Hash
         id: hash

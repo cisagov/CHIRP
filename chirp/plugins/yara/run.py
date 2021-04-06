@@ -5,12 +5,13 @@ from functools import lru_cache
 from glob import glob
 import itertools
 import json
+import logging
 import os
-import re
-from typing import Any, Dict, Iterator, Tuple, Union
+import string
+from typing import Any, Dict, Iterator, List, Tuple, Union
 
 # cisagov Libraries
-from chirp.common import CONSOLE, OS, OUTPUT_DIR, build_report
+from chirp.common import OS, OUTPUT_DIR, TARGETS, build_report
 
 try:
     # Third-Party Libraries
@@ -20,6 +21,26 @@ try:
     HAS_LIBS = True
 except ImportError:
     HAS_LIBS = False
+
+if OS == "Windows":
+    # Standard Python Libraries
+    from ctypes import windll
+
+
+def _get_drives() -> List[str]:
+    """
+    Return a list of valid drives.
+
+    Reference: `RichieHindle, StackOverflow <https://stackoverflow.com/a/827398>`_
+    """
+    drives = []
+    bitmask = windll.kernel32.GetLogicalDrives()
+    for letter in string.ascii_uppercase:
+        if bitmask & 1:
+            drives.append(letter)
+        bitmask >>= 1
+
+    return drives
 
 
 def normalize_paths(path: str) -> Iterator[str]:
@@ -31,10 +52,8 @@ def normalize_paths(path: str) -> Iterator[str]:
     :rtype: Iterator[str]
     """
     if OS == "Windows" and path == "\\**":
-        for letter in re.findall(
-            r"[A-Z]+:.*$", os.popen("mountvol /").read(), re.MULTILINE  # nosec
-        ):
-            yield from normalize_paths(letter + "**")
+        for letter in _get_drives():
+            yield from normalize_paths(letter + ":\\**")
     elif "*" in path:
         yield from [p for p in glob(path, recursive=True) if os.path.exists(p)]
     if "," in path:
@@ -74,13 +93,11 @@ if HAS_LIBS:
             os.getcwd(),
         ]  # Ignore these paths, so we don't enumerate cloud drives or our current working directory
         if count % 50000 == 0 and count != 0:
-            CONSOLE(
-                "[cyan][YARA][/cyan] We're still working on scanning files. {} processed.".format(
-                    count
-                )
+            logging.log(
+                62, "We're still working on scanning files. {} processed.".format(count)
             )
         if count == 1:
-            CONSOLE("[cyan][YARA][/cyan] Beginning processing.")
+            logging.log(62, "Beginning processing.")
 
         # Sometimes glob.glob gives us paths with *
         if (
@@ -110,17 +127,22 @@ if HAS_LIBS:
         if not indicators:
             return
 
-        CONSOLE("[cyan][YARA][/cyan] Entered yara plugin.")
+        logging.info("Entered yara plugin.")
 
-        files = [i["indicator"]["files"] for i in indicators]
+        files = (
+            [i["indicator"]["files"] for i in indicators] if not TARGETS else TARGETS
+        )
         files = "\\**" if "\\**" in files else ", ".join(files)
+
+        logging.info("Yara targets: {}".format(files))
 
         if files == "\\**":
             blame = [i["name"] for i in indicators if i["indicator"]["files"] == "\\**"]
-            CONSOLE(
-                "[cyan][YARA][/cyan] Enumerating the entire filesystem due to {}... this is going to take a while.".format(
+            logging.log(
+                62,
+                "Enumerating the entire filesystem due to {}... this is going to take a while.".format(
                     blame
-                )
+                ),
             )
 
         report = {
@@ -148,8 +170,8 @@ if HAS_LIBS:
 
         count = len(run_args)
 
-        CONSOLE("[cyan][YARA][/cyan] Done. Processed {} files.".format(count))
-        CONSOLE("[cyan][YARA][/cyan] Found {} hit(s) for yara indicators.".format(hits))
+        logging.log(62, "Done. Processed {} files.".format(count))
+        logging.log(62, "Found {} hit(s) for yara indicators.".format(hits))
 
         with open(os.path.join(OUTPUT_DIR, "yara.json"), "w+") as writeout:
             writeout.write(
@@ -158,10 +180,10 @@ if HAS_LIBS:
 
 
 else:
-    CONSOLE(
-        "[red][!][/red] yara-python is a required dependency for the yara plugin. Please install yara-python with pip."
+    logging.error(
+        "yara-python is a required dependency for the yara plugin. Please install yara-python with pip."
     )
-    CONSOLE("[cyan][YARA][/cyan] Hit an error, exiting.")
+    logging.error("Hit an error, exiting.")
 
     async def run(indicators: dict) -> None:
         """Return if there is an import error.
