@@ -9,7 +9,7 @@ import time
 
 # cisagov Libraries
 from chirp import run
-from chirp.common import OUTPUT_DIR, save_log, wait
+from chirp.common import NON_INTERACTIVE, OUTPUT_DIR, iocs_discovered, save_log, wait
 
 if __name__ == "__main__":
     try:
@@ -18,14 +18,20 @@ if __name__ == "__main__":
         time.sleep(2)
         logging.log(
             70,
-            "DONE! Your results can be found in {}.".format(
-                os.path.abspath(OUTPUT_DIR)
-            ),
+            "DONE! Your results can be found in {}".format(os.path.abspath(OUTPUT_DIR)),
         )
-        wait()
+        iocs_discovered = iocs_discovered()
+        # sleep to account for console interval
+        time.sleep(2)
         save_log()
-        sys.exit(0)
+        # non-zero exit if ioc's discovered and non_interactive mode enabled
+        if NON_INTERACTIVE and iocs_discovered:
+            sys.exit(1)
+        else:
+            wait()
+            sys.exit(0)
     except KeyboardInterrupt:
         logging.error("Received an escape sequence. Goodbye.")
         save_log()
-        sys.exit(0)
+        # indicate abnormal exit with 2
+        sys.exit(2)

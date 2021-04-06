@@ -3,6 +3,8 @@
 # Standard Python Libraries
 import argparse
 import ctypes
+import glob
+import json
 import logging
 import os
 import sys
@@ -50,6 +52,7 @@ ARGS, _ = parser.parse_known_args()
 OUTPUT_DIR = ARGS.output
 PLUGINS = ARGS.plugins
 TARGETS = ARGS.targets
+NON_INTERACTIVE = ARGS.non_interactive
 
 if ARGS.verbose >= 2:
     LOG_LEVEL = logging.NOTSET
@@ -140,3 +143,18 @@ def wait() -> None:
         else:
             os.system('read -s -n 1 -p "Press any key to continue..."')  # nosec
             print()
+
+
+def iocs_discovered() -> bool:
+    """Determine whether iocs were discovered."""
+    report_files = glob.glob("{}/*".format(OUTPUT_DIR))
+    for report_file in report_files:
+        with open(report_file, "r") as f:
+            data = json.load(f)
+            if len(data) > 0:
+                logging.error(
+                    "Discovered IoC's, please see output reports for more details."
+                )
+                return True
+    logging.info("No IoC's discovered!")
+    return False
