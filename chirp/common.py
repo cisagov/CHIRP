@@ -152,9 +152,9 @@ def iocs_discovered() -> bool:
         with open(report_file, "r") as f:
             data = json.load(f)
             if len(data) > 0:
-                logging.error(
-                    "Discovered IoC's, please see output reports for more details."
+                logging.log(
+                    70, "Discovered IoC's, please see output reports for more details."
                 )
                 return True
-    logging.info("No IoC's discovered!")
+    logging.log(70, "No IoC's discovered!")
     return False
