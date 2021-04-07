@@ -1,6 +1,7 @@
 """Will acquire forensic data ready to parse by __scan__.py."""
 
 # Standard Python Libraries
+import logging
 import subprocess  # nosec
 from typing import List
 
@@ -34,7 +35,13 @@ def parse_dns(dns: bytes) -> List[str]:
     dnsrecords = dns
     temp_list = []
 
-    for line in dnsrecords.decode().splitlines():
+    try:
+        dnsrecords = dnsrecords.decode("utf-8")
+    except UnicodeDecodeError:
+        logging.error("Unable to read dns records returned by `ipconfig /displaydns`")
+        return []
+
+    for line in dnsrecords.splitlines():
         temp_line = line.lstrip()
         if (
             temp_line.startswith("Record Name")
@@ -56,6 +63,12 @@ def parse_netstat(netstat: bytes) -> List[str]:
     """
     netstatrecords = netstat
     temp_list = []
+
+    try:
+        netstatrecords = netstatrecords.decode("utf-8")
+    except UnicodeDecodeError:
+        logging.error("Unable to read netstat returned by `netstat -abno`")
+        return []
 
     for line in netstatrecords.decode().splitlines():
         if len(line.split()) > 2 or line.lstrip().startswith("Proto"):
