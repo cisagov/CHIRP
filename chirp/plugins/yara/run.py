@@ -1,12 +1,15 @@
 """Provides a coroutine to run yara rules against a set of files."""
 
 # Standard Python Libraries
-from functools import lru_cache
-from glob import glob
+from functools import lru_cache, partial
+from glob import iglob
+import hashlib
 import itertools
 import json
 import logging
+from multiprocessing import Pool
 import os
+import signal
 import string
 from typing import Any, Dict, Iterator, List, Tuple, Union
 
@@ -15,7 +18,6 @@ from chirp.common import OS, OUTPUT_DIR, TARGETS, build_report
 
 try:
     # Third-Party Libraries
-    import aiomultiprocess as aiomp
     import yara
 
     HAS_LIBS = True
@@ -55,7 +57,7 @@ def normalize_paths(path: str) -> Iterator[str]:
         for letter in _get_drives():
             yield from normalize_paths(letter + ":\\**")
     elif "*" in path:
-        yield from [p for p in glob(path, recursive=True) if os.path.exists(p)]
+        yield from iglob(path, recursive=True)
     if "," in path:
         yield from list(
             itertools.chain.from_iterable(
@@ -79,34 +81,43 @@ if HAS_LIBS:
         """
         return yara.compile(sources=dict(indicators))
 
-    async def _run(args: Tuple[int, str, dict]) -> Union[Dict[str, Any], None]:
+    def _sha256(filepath):
+        try:
+            return hashlib.sha256(
+                "".join(
+                    x.rstrip() for x in open(filepath, "r", encoding="utf8").readlines()
+                ).encode()
+            ).hexdigest()
+        except (PermissionError, UnicodeDecodeError):
+            return None
+
+    def _generate_hashes(path="./indicators/*"):
+        return (_sha256(f) for f in iglob(path))
+
+    HASHES = list(_generate_hashes())
+
+    def _compare_hash(path):
+        try:
+            return _sha256(path) in HASHES
+        except MemoryError:
+            return False
+
+    def _run(indicators, count_path) -> Union[Dict[str, Any], None]:
         """Handle our multiprocessing tasks."""
-        count, path, indicators = args
-        _indicators = [
-            (indicator["name"], indicator["indicator"]["rule"])
-            for indicator in indicators
-        ]
-        yara_rules = compile_rules(tuple(_indicators))
-        ignorelist = [
-            "\\OneDrive\\",
-            "\\OneDriveTemp\\",
-            os.getcwd(),
-        ]  # Ignore these paths, so we don't enumerate cloud drives or our current working directory
-        if count % 50000 == 0 and count != 0:
+        count, path = count_path
+        if count == 1:
+            logging.log(62, "Beginning processing.")
+        elif count % 50000 == 0:
             logging.log(
                 62, "We're still working on scanning files. {} processed.".format(count)
             )
-        if count == 1:
-            logging.log(62, "Beginning processing.")
+        if os.path.exists(path) and not os.path.isdir(path) and not _compare_hash(path):
+            _indicators = [
+                (indicator["name"], indicator["indicator"]["rule"])
+                for indicator in indicators
+            ]
+            yara_rules = compile_rules(tuple(_indicators))
 
-        # Sometimes glob.glob gives us paths with *
-        if (
-            os.path.exists(path)
-            and (
-                path != "." and path != "\\" and all(x not in path for x in ignorelist)
-            )
-            and not os.path.isdir(path)
-        ):
             try:
                 matches = yara_rules.match(path)
                 if matches:
@@ -117,6 +128,15 @@ if HAS_LIBS:
                         return match_dict
             except yara.Error:
                 pass
+            except UnicodeEncodeError:
+                logging.error("{} threw a Unicode encoding error.".format(path))
+
+    def _signal_handler():
+        """Handle keyboard interrupts received during multiprocessing.
+
+        Reference: `John Reese <https://jreese.sh/blog/python-multiprocessing-keyboardinterrupt>`_
+        """
+        signal.signal(signal.SIGINT, signal.SIG_IGN)
 
     async def run(indicators: dict) -> None:
         """Accept a dict containing yara indicators and write out to the OUTPUT_DIR specified by chirp.common.
@@ -150,25 +170,24 @@ if HAS_LIBS:
         }
 
         hits = 0
-        run_args = []
+        count = 0
 
         # Normalize every path, for every path
         try:
-            run_args = [
-                (a, b, indicators) for a, b in enumerate(normalize_paths(files), 1)
-            ]
-            async with aiomp.Pool() as pool:
-                try:
-                    async for result in pool.map(_run, tuple(run_args)):
-                        if result:
-                            report[result["namespace"]]["matches"].append(result)
-                            hits += 1
-                except KeyboardInterrupt:
-                    pass
+            with Pool(initializer=_signal_handler) as pool:
+                for result in pool.imap_unordered(
+                    partial(_run, indicators),
+                    enumerate(normalize_paths(files), 1),
+                    chunksize=1000,
+                ):
+                    if result:
+                        report[result["namespace"]]["matches"].append(result)
+                        hits += 1
+                    count += 1
         except IndexError:
             pass
-
-        count = len(run_args)
+        except KeyboardInterrupt:
+            logging.log(62, "Received a keyboard interrupt. Killing workers.")
 
         logging.log(62, "Done. Processed {} files.".format(count))
         logging.log(62, "Found {} hit(s) for yara indicators.".format(hits))

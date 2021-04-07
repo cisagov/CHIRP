@@ -142,6 +142,7 @@ OS functions
 - Chris Brown
 - [Julian Blanco, LTJG USCG](https://github.com/julianblanco)
 - [Caleb Stewart, LT USCG](https://github.com/calebstewart)
+- James Haughom
 
 ## 🤝 Contributing <a name = "contributing"></a>
 

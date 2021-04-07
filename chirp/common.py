@@ -11,6 +11,7 @@ import typing as t
 # Third-Party Libraries
 from rich.console import Console
 from rich.logging import RichHandler
+from rich.theme import Theme
 
 parser = argparse.ArgumentParser(
     prog="CHIRP",
@@ -61,7 +62,18 @@ else:
 if ARGS.silent:
     LOG_LEVEL = 100
 
-_CONSOLE = Console(record=True)
+_CONSOLE = Console(
+    record=True,
+    theme=Theme(
+        {
+            "logging.level.registry": "bright_green",
+            "logging.level.events": "bright_blue",
+            "logging.level.yara": "bright_yellow",
+            "logging.level.network": "bright_white",
+            "logging.level.complete": "bright_cyan",
+        }
+    ),
+)
 
 logging.basicConfig(
     level=LOG_LEVEL,
