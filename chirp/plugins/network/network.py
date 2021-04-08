@@ -70,7 +70,7 @@ def parse_netstat(netstat: bytes) -> List[str]:
         logging.error("Unable to read netstat returned by `netstat -abno`")
         return []
 
-    for line in netstatrecords.decode().splitlines():
+    for line in netstatrecords.splitlines():
         if len(line.split()) > 2 or line.lstrip().startswith("Proto"):
             ip = line.split()[2]
             if ip not in ["*:*", "obtain", "[::]:0"]:
