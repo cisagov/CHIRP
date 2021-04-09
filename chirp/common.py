@@ -58,6 +58,8 @@ if ARGS.verbose >= 2:
     LOG_LEVEL = logging.NOTSET
 elif ARGS.verbose == 1:
     LOG_LEVEL = logging.INFO
+elif NON_INTERACTIVE:
+    LOG_LEVEL = 70
 else:
     LOG_LEVEL = logging.ERROR
 
