@@ -115,6 +115,10 @@ python3 chirp.py -p registry yara -t c:\\target_dir\\** -o chirp_result -l debug
            [+] Done! Your results can be found at Z:\README\output.
 ```
 
+### Non-interactive Mode
+
+Non-interactive mode may be used by issuing the "--non-interactive" flag at runtime. Using this flag enables process completion without input. In addition, a non-zero status of 1 will be emitted at runtime completion if IoC's were discovered.
+
 ## ⛏️ Built Using <a name = "built_using"></a>
 
 - [Python](https://www.Python.org/) - Language
