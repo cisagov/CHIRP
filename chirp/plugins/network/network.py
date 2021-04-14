@@ -1,7 +1,6 @@
 """Will acquire forensic data ready to parse by __scan__.py."""
 
 # Standard Python Libraries
-import logging
 import subprocess  # nosec
 from typing import List
 
@@ -54,6 +53,6 @@ def parse_netstat(netstat: bytes) -> List[bytes]:
     for record in netstatrecords:
         if len(record.split()) > 2 or record.startswith(b"Proto"):
             ip = record.split()[2]
-            if ip not in [b"*:*",b"obtain",b"[::]:0"]:
+            if ip not in [b"*:*", b"obtain", b"[::]:0"]:
                 temp_list.append(ip)
     return temp_list
