@@ -18,6 +18,9 @@ parser = argparse.ArgumentParser(
     description="CHIRP. A Window host forensic artifact collection tool.",
 )
 parser.add_argument(
+    "-a", "--activity", help="Specified AA threat package to run.", required=True
+)
+parser.add_argument(
     "-o", "--output", help="Specified output directory.", default="output"
 )
 parser.add_argument(
@@ -51,6 +54,7 @@ ARGS, _ = parser.parse_known_args()
 OUTPUT_DIR = ARGS.output
 PLUGINS = ARGS.plugins
 TARGETS = ARGS.targets
+ACTIVITY = ARGS.activity
 
 if ARGS.verbose >= 2:
     LOG_LEVEL = logging.NOTSET
@@ -84,11 +88,17 @@ logging.basicConfig(
     ],
 )
 
-logging.addLevelName(60, "EVENTS")
-logging.addLevelName(61, "REGISTRY")
-logging.addLevelName(62, "YARA")
-logging.addLevelName(63, "NETWORK")
-logging.addLevelName(70, "COMPLETE")
+EVENTS = 60
+REGISTRY = 61
+YARA = 62
+NETWORK = 63
+COMPLETE = 70
+
+logging.addLevelName(EVENTS, "EVENTS")
+logging.addLevelName(REGISTRY, "REGISTRY")
+logging.addLevelName(YARA, "YARA")
+logging.addLevelName(NETWORK, "NETWORK")
+logging.addLevelName(COMPLETE, "COMPLETE")
 
 
 def _is_admin():

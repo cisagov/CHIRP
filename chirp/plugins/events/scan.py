@@ -10,7 +10,7 @@ from typing import Dict, List, Tuple, Union
 import aiomultiprocess as aiomp
 
 # cisagov Libraries
-from chirp.common import OUTPUT_DIR, build_report
+from chirp.common import EVENTS, OUTPUT_DIR, build_report
 from chirp.plugins import operators
 from chirp.plugins.events.events import gather
 
@@ -66,10 +66,10 @@ async def _run(run_args):
         report,
         num_logs,
     ) = run_args  # Unpack our arguments (bundled to passthrough for multiprocessing)
-    logging.log(60, "Reading {} event logs.".format(event_type.split("%4")[-1]))
+    logging.log(EVENTS, "Reading {} event logs.".format(event_type.split("%4")[-1]))
     async for event_log in gather(event_type):  # Iterate over event logs
         if event_log == "ERROR":
-            logging.log(60, "Hit an error, exiting.")
+            logging.log(EVENTS, "Hit an error, exiting.")
             return
         if event_log:
             num_logs += 1
@@ -135,7 +135,7 @@ async def run(indicators: dict) -> None:
             pass
 
     hits = sum(len(v["matches"]) for _, v in report.items())
-    logging.log(60, "Read {} logs, found {} matches.".format(num_logs, hits))
+    logging.log(EVENTS, "Read {} logs, found {} matches.".format(num_logs, hits))
     with open(os.path.join(OUTPUT_DIR, "events.json"), "w+") as writeout:
         writeout.write(
             json.dumps({r: report[r] for r in report if report[r]["matches"]})

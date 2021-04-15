@@ -7,7 +7,7 @@ import os
 from typing import List
 
 # cisagov Libraries
-from chirp.common import OUTPUT_DIR, build_report
+from chirp.common import NETWORK, OUTPUT_DIR, build_report
 from chirp.plugins.network.network import (
     grab_dns,
     grab_netstat,
@@ -52,9 +52,9 @@ async def run(indicators: dict) -> None:
                     report[indicator["name"]]["matches"].append(ioc)
                     hits += 1
         except KeyError:
-            logging.log(63, "{} appears to be malformed.".format(indicator))
+            logging.log(NETWORK, "{} appears to be malformed.".format(indicator))
     logging.log(
-        63,
+        NETWORK,
         "Read {} records, found {} IoC hits.".format(
             len(saved_dns) + len(saved_ns), hits
         ),

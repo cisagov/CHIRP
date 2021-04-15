@@ -8,7 +8,7 @@ from typing import Callable, Dict, Iterable, Iterator, List
 
 # cisagov Libraries
 from chirp import load
-from chirp.common import OUTPUT_DIR, PLUGINS
+from chirp.common import ACTIVITY, OUTPUT_DIR, PLUGINS
 from chirp.plugins import events, loader, network, registry, yara  # noqa: F401
 
 
@@ -38,7 +38,7 @@ async def _run_coroutines(plugins: Dict[str, Callable]) -> None:
     """
     _indicators = list(
         check_valid_indicator_types(
-            load.from_yaml(get_indicators()), list(plugins.keys())
+            load.from_yaml(get_indicators(ACTIVITY)), list(plugins.keys())
         )
     )
     await asyncio.gather(
@@ -73,9 +73,7 @@ def check_valid_indicator_types(
             yield indicator
             logging.debug("Loaded {}".format(indicator["name"]))
         else:
-            if (indicator["ioc_type"] in plugins or "all" in plugins) and indicator[
-                "ioc_type"
-            ] not in failed_types:
+            if "all" in plugins and indicator["ioc_type"] not in failed_types:
                 logging.error(
                     """Can't locate plugin "{}". It is possible it has not loaded due to an error.""".format(
                         indicator["ioc_type"]
@@ -85,16 +83,19 @@ def check_valid_indicator_types(
             continue
 
 
-def get_indicators() -> Iterator[str]:
+def get_indicators(activity_directory: str) -> Iterator[str]:
     """Yield paths to indicators.
 
     :yield: A path to an indicator file.
     :rtype: Iterator[str]
     """
+    path = os.path.join("indicators", activity_directory)
+    if not os.path.exists(path):
+        logging.error("The path {} does not exist.".format(path))
     try:
-        for f in os.listdir("indicators"):
+        for f in os.listdir(path):
             if "README" not in f and f.split(".")[-1] in ("yaml", "yml"):
-                yield os.path.join("indicators", f)
+                yield os.path.join(path, f)
     except FileNotFoundError:
         logging.error(
             "Could not find an indicators directory. Indicators should be in the same directory as this executable."

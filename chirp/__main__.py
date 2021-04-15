@@ -9,7 +9,7 @@ import time
 
 # cisagov Libraries
 from chirp import run
-from chirp.common import OUTPUT_DIR, save_log, wait
+from chirp.common import COMPLETE, OUTPUT_DIR, save_log, wait
 
 if __name__ == "__main__":
     try:
@@ -17,7 +17,7 @@ if __name__ == "__main__":
         run.run()
         time.sleep(2)
         logging.log(
-            70,
+            COMPLETE,
             "DONE! Your results can be found in {}.".format(
                 os.path.abspath(OUTPUT_DIR)
             ),

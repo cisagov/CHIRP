@@ -4,6 +4,9 @@
 import logging
 from typing import Iterator, Tuple
 
+# cisagov Libraries
+from chirp.common import REGISTRY
+
 HAS_LIBS = False
 try:
     # Standard Python Libraries
@@ -77,7 +80,7 @@ if HAS_LIBS:
         """
         hive, key = _normalize_key(hkey)
         if not hive or not key:
-            logging.log(61, "Unable to read key '{}'".format(hkey))
+            logging.log(REGISTRY, "Unable to read key '{}'".format(hkey))
             return
         registry = winreg.ConnectRegistry(None, hive)
         try:
@@ -90,7 +93,7 @@ if HAS_LIBS:
                         "registry_type": REGISTRY_VALUE_TYPES[value_tuple[2]],
                     }
         except FileNotFoundError:
-            logging.log(61, "Key {} does not exist.".format(hkey))
+            logging.log(REGISTRY, "Key {} does not exist.".format(hkey))
 
 
 else:
@@ -103,5 +106,5 @@ else:
         :yield: Literally "ERROR"
         :rtype: Iterator[str]
         """
-        logging.log(61, "Registry plugin is only compatible with Windows.")
+        logging.log(REGISTRY, "Registry plugin is only compatible with Windows.")
         yield "ERROR"
