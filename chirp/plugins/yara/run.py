@@ -29,6 +29,19 @@ if OS == "Windows":
     from ctypes import windll
 
 
+def _unicode_handler(file_path):
+    try:
+        if isinstance(file_path, bytes):
+            return file_path.decode(encoding="utf8")
+        elif isinstance(file_path, str):
+            return file_path.encode(encoding="utf8")
+        else:
+            logging.error("Unicode handler received incorrect file type.")
+            return "???"
+    except UnicodeError:
+        return _unicode_handler(os.path.dirname(file_path))
+
+
 def _get_drives() -> List[str]:
     """
     Return a list of valid drives.
@@ -88,7 +101,7 @@ if HAS_LIBS:
                     x.rstrip() for x in open(filepath, "r", encoding="utf8").readlines()
                 ).encode()
             ).hexdigest()
-        except (PermissionError, UnicodeDecodeError):
+        except (PermissionError, UnicodeError):
             return None
 
     def _generate_hashes(path="./indicators/*"):
@@ -129,8 +142,12 @@ if HAS_LIBS:
                         return match_dict
             except yara.Error:
                 pass
-            except UnicodeEncodeError:
-                logging.error(str.encode(path) + b" threw a Unicode encoding error.")
+            except UnicodeError:
+                logging.error(
+                    "Unicode error in {} file or directory. May require manual investigation.".format(
+                        _unicode_handler(path)
+                    )
+                )
 
     def _signal_handler():
         """Handle keyboard interrupts received during multiprocessing.
