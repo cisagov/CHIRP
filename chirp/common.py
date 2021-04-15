@@ -19,9 +19,7 @@ parser = argparse.ArgumentParser(
     prog="CHIRP",
     description="CHIRP. A Window host forensic artifact collection tool.",
 )
-parser.add_argument(
-    "-a", "--activity", help="Specified AA threat package to run.", required=True
-)
+parser.add_argument("-a", "--activity", help="Specified AA threat package to run.")
 parser.add_argument(
     "-o", "--output", help="Specified output directory.", default="output"
 )
@@ -177,8 +175,9 @@ def iocs_discovered() -> bool:
             data = json.load(f)
             if len(data) > 0:
                 logging.log(
-                    70, "Discovered IoC's, please see output reports for more details."
+                    COMPLETE,
+                    "Discovered IoC's, please see output reports for more details.",
                 )
                 return True
-    logging.log(70, "No IoC's discovered!")
+    logging.log(COMPLETE, "No IoC's discovered!")
     return False

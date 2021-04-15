@@ -89,6 +89,8 @@ def get_indicators(activity_directory: str) -> Iterator[str]:
     :yield: A path to an indicator file.
     :rtype: Iterator[str]
     """
+    if not activity_directory:
+        activity_directory = _extracted_from_get_indicators_4()
     path = os.path.join("indicators", activity_directory)
     if not os.path.exists(path):
         logging.error("The path {} does not exist.".format(path))
@@ -100,3 +102,14 @@ def get_indicators(activity_directory: str) -> Iterator[str]:
         logging.error(
             "Could not find an indicators directory. Indicators should be in the same directory as this executable."
         )
+
+
+def _extracted_from_get_indicators_4():
+    print()
+    print("Valid Activities")
+    print("----------------")
+    [print(x) for x in os.listdir("indicators") if x.startswith("AA")]
+    result = input("Please specify an activity: ")
+    print()
+
+    return result
