@@ -129,7 +129,7 @@ if HAS_LIBS:
             except yara.Error:
                 pass
             except UnicodeEncodeError:
-                logging.error(path + b" threw a Unicode encoding error.")
+                logging.error(str.encode(path) + b" threw a Unicode encoding error.")
 
     def _signal_handler():
         """Handle keyboard interrupts received during multiprocessing.
