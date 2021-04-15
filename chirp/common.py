@@ -176,8 +176,8 @@ def iocs_discovered() -> bool:
             if len(data) > 0:
                 logging.log(
                     COMPLETE,
-                    "Discovered IoC's, please see output reports for more details.",
+                    "Discovered IoCs, please see output reports for more details.",
                 )
                 return True
-    logging.log(COMPLETE, "No IoC's discovered!")
+    logging.log(COMPLETE, "No IoCs discovered!")
     return False
