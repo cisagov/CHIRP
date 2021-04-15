@@ -1,7 +1,6 @@
 """Will acquire forensic data ready to parse by __scan__.py."""
 
 # Standard Python Libraries
-import logging
 import subprocess  # nosec
 from typing import List
 
@@ -24,56 +23,36 @@ def grab_dns() -> bytes:
     return subprocess.check_output("ipconfig /displaydns")  # nosec
 
 
-def parse_dns(dns: bytes) -> List[str]:
+def parse_dns(dns: bytes) -> List[bytes]:
     """Parse the output of grab_dns, returning a list of parsed values that we would like to search.
 
     :param dns: Output of grab_dns
     :type dns: bytes
     :return: A list of parsed values (Record Name, CNAME, A (HOST))
-    :rtype: List[str]
+    :rtype: List[bytes]
     """
-    dnsrecords = dns
-    temp_list = []
-
-    try:
-        dnsrecords = dnsrecords.decode("utf-8")
-    except UnicodeDecodeError:
-        logging.error("Unable to read dns records returned by `ipconfig /displaydns`")
-        return []
-
-    for line in dnsrecords.splitlines():
-        temp_line = line.lstrip()
-        if (
-            temp_line.startswith("Record Name")
-            or temp_line.startswith("CNAME")
-            or temp_line.startswith("A (Host)")
-        ):
-            temp_list.append(temp_line.split(": ")[1])
-
-    return temp_list
+    dnsrecords = dns.splitlines()
+    search_terms = [b"A (Host)", b"CNAME", b"Record Name"]
+    return [
+        record.split(b":")[1].strip()
+        for record in dnsrecords
+        if any(x in record for x in search_terms)
+    ]
 
 
-def parse_netstat(netstat: bytes) -> List[str]:
+def parse_netstat(netstat: bytes) -> List[bytes]:
     """Parse the output of grab_netstat, returning a list of parsed values that we would like to search.
 
     :param netstat: Output of grab_dns
     :type netstat: bytes
     :return: A list of parsed values
-    :rtype: List[str]
+    :rtype: List[bytes]
     """
-    netstatrecords = netstat
+    netstatrecords = [x.lstrip() for x in netstat.splitlines()]
     temp_list = []
-
-    try:
-        netstatrecords = netstatrecords.decode("utf-8")
-    except UnicodeDecodeError:
-        logging.error("Unable to read netstat returned by `netstat -abno`")
-        return []
-
-    for line in netstatrecords.splitlines():
-        if len(line.split()) > 2 or line.lstrip().startswith("Proto"):
-            ip = line.split()[2]
-            if ip not in ["*:*", "obtain", "[::]:0"]:
+    for record in netstatrecords:
+        if len(record.split()) > 2 or record.startswith(b"Proto"):
+            ip = record.split()[2]
+            if ip not in [b"*:*", b"obtain", b"[::]:0"]:
                 temp_list.append(ip)
-
     return temp_list

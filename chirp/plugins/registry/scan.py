@@ -7,7 +7,7 @@ import os
 from typing import Dict, List, Tuple, Union
 
 # cisagov Libraries
-from chirp.common import OUTPUT_DIR, build_report
+from chirp.common import OUTPUT_DIR, REGISTRY, build_report
 from chirp.plugins import operators
 from chirp.plugins.registry.registry import enumerate_registry_values
 
@@ -45,7 +45,8 @@ async def check_matches(
 async def _report_hits(indicator: str, vals: dict) -> None:
     """Write to the log the number of hits for a given indicator."""
     logging.log(
-        61, "Found {} hit(s) for {} indicator.".format(len(vals["matches"]), indicator)
+        REGISTRY,
+        "Found {} hit(s) for {} indicator.".format(len(vals["matches"]), indicator),
     )
 
 
@@ -62,10 +63,10 @@ async def run(indicators: dict) -> None:
     for indicator in indicators:
         ind = indicator["indicator"]
         indicator_list = [(k, v) for k, v in ind.items() if k != "registry_key"]
-        logging.log(61, "Reading {}".format(ind["registry_key"]))
+        logging.log(REGISTRY, "Reading {}".format(ind["registry_key"]))
         async for value in enumerate_registry_values(ind["registry_key"]):
             if value == "ERROR":
-                logging.log(61, "Hit an error, exiting.")
+                logging.log(REGISTRY, "Hit an error, exiting.")
                 return
             hits, search_criteria, match = await check_matches(indicator_list, value)
             if hits != len(indicator_list):

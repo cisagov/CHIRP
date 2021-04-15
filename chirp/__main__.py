@@ -9,7 +9,14 @@ import time
 
 # cisagov Libraries
 from chirp import run
-from chirp.common import NON_INTERACTIVE, OUTPUT_DIR, iocs_discovered, save_log, wait
+from chirp.common import (
+    COMPLETE,
+    NON_INTERACTIVE,
+    OUTPUT_DIR,
+    iocs_discovered,
+    save_log,
+    wait,
+)
 
 if __name__ == "__main__":
     try:
@@ -17,12 +24,14 @@ if __name__ == "__main__":
         run.run()
         time.sleep(2)
         logging.log(
-            70,
-            "DONE! Your results can be found in {}".format(os.path.abspath(OUTPUT_DIR)),
+            COMPLETE,
+            "DONE! Your results can be found in {}.".format(
+                os.path.abspath(OUTPUT_DIR)
+            ),
         )
         iocs_discovered = iocs_discovered()
         save_log()
-        # non-zero exit if ioc's discovered and non_interactive mode enabled
+        # non-zero exit if iocs discovered and non_interactive mode enabled
         if NON_INTERACTIVE and iocs_discovered:
             sys.exit(1)
         else:

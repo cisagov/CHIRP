@@ -14,7 +14,7 @@ import string
 from typing import Any, Dict, Iterator, List, Tuple, Union
 
 # cisagov Libraries
-from chirp.common import OS, OUTPUT_DIR, TARGETS, build_report
+from chirp.common import OS, OUTPUT_DIR, TARGETS, YARA, build_report
 
 try:
     # Third-Party Libraries
@@ -27,6 +27,19 @@ except ImportError:
 if OS == "Windows":
     # Standard Python Libraries
     from ctypes import windll
+
+
+def _unicode_handler(file_path):
+    try:
+        if isinstance(file_path, bytes):
+            return file_path.decode(encoding="utf8")
+        elif isinstance(file_path, str):
+            return file_path.encode(encoding="utf8")
+        else:
+            logging.error("Unicode handler received incorrect file type.")
+            return "???"
+    except UnicodeError:
+        return _unicode_handler(os.path.dirname(file_path))
 
 
 def _get_drives() -> List[str]:
@@ -88,7 +101,7 @@ if HAS_LIBS:
                     x.rstrip() for x in open(filepath, "r", encoding="utf8").readlines()
                 ).encode()
             ).hexdigest()
-        except (PermissionError, UnicodeDecodeError):
+        except (PermissionError, UnicodeError):
             return None
 
     def _generate_hashes(path="./indicators/*"):
@@ -106,10 +119,11 @@ if HAS_LIBS:
         """Handle our multiprocessing tasks."""
         count, path = count_path
         if count == 1:
-            logging.log(62, "Beginning processing.")
+            logging.log(YARA, "Beginning processing.")
         elif count % 50000 == 0:
             logging.log(
-                62, "We're still working on scanning files. {} processed.".format(count)
+                YARA,
+                "We're still working on scanning files. {} processed.".format(count),
             )
         if os.path.exists(path) and not os.path.isdir(path) and not _compare_hash(path):
             _indicators = [
@@ -128,8 +142,12 @@ if HAS_LIBS:
                         return match_dict
             except yara.Error:
                 pass
-            except UnicodeEncodeError:
-                logging.error("{} threw a Unicode encoding error.".format(path))
+            except UnicodeError:
+                logging.error(
+                    "Unicode error in {} file or directory. May require manual investigation.".format(
+                        _unicode_handler(path)
+                    )
+                )
 
     def _signal_handler():
         """Handle keyboard interrupts received during multiprocessing.
@@ -159,7 +177,7 @@ if HAS_LIBS:
         if files == "\\**":
             blame = [i["name"] for i in indicators if i["indicator"]["files"] == "\\**"]
             logging.log(
-                62,
+                YARA,
                 "Enumerating the entire filesystem due to {}... this is going to take a while.".format(
                     blame
                 ),
@@ -187,10 +205,10 @@ if HAS_LIBS:
         except IndexError:
             pass
         except KeyboardInterrupt:
-            logging.log(62, "Received a keyboard interrupt. Killing workers.")
+            logging.log(YARA, "Received a keyboard interrupt. Killing workers.")
 
-        logging.log(62, "Done. Processed {} files.".format(count))
-        logging.log(62, "Found {} hit(s) for yara indicators.".format(hits))
+        logging.log(YARA, "Done. Processed {} files.".format(count))
+        logging.log(YARA, "Found {} hit(s) for yara indicators.".format(hits))
 
         with open(os.path.join(OUTPUT_DIR, "yara.json"), "w+") as writeout:
             writeout.write(

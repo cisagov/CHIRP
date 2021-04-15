@@ -7,7 +7,7 @@ import os
 from typing import List
 
 # cisagov Libraries
-from chirp.common import OUTPUT_DIR, build_report
+from chirp.common import NETWORK, OUTPUT_DIR, build_report
 from chirp.plugins.network.network import (
     grab_dns,
     grab_netstat,
@@ -16,7 +16,7 @@ from chirp.plugins.network.network import (
 )
 
 
-async def hunter(records: List[str], ioc: str) -> bool:
+async def hunter(records: List[bytes], ioc: str) -> bool:
     """Return if any record in a list of records matches a given IoC.
 
     :param records: A list of network records
@@ -26,7 +26,7 @@ async def hunter(records: List[str], ioc: str) -> bool:
     :return: If any record in the list of records matches the IoC
     :rtype: bool
     """
-    return any(ioc.lower() in record.lower() for record in records)
+    return any(str.encode(ioc.lower()) in record.lower() for record in records)
 
 
 async def run(indicators: dict) -> None:
@@ -48,13 +48,13 @@ async def run(indicators: dict) -> None:
     for indicator in indicators:
         try:
             for ioc in indicator["indicator"]["ips"].splitlines():
-                if await hunter(saved_ns + ["\n"] + saved_dns, ioc):
+                if await hunter(saved_ns + saved_dns, ioc):
                     report[indicator["name"]]["matches"].append(ioc)
                     hits += 1
         except KeyError:
-            logging.log(63, "{} appears to be malformed.".format(indicator))
+            logging.log(NETWORK, "{} appears to be malformed.".format(indicator))
     logging.log(
-        63,
+        NETWORK,
         "Read {} records, found {} IoC hits.".format(
             len(saved_dns) + len(saved_ns), hits
         ),

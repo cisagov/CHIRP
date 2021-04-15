@@ -11,7 +11,7 @@ import sys
 from typing import Any, Dict, Iterator, List, Union
 
 # cisagov Libraries
-from chirp.common import JSON, OS
+from chirp.common import EVENTS, JSON, OS
 
 HAS_LIBS = False
 try:
@@ -64,7 +64,7 @@ default_dir = _path_iterator()
 
 if not default_dir:
     if OS == "Windows":
-        logging.log(60, "We can't find windows event logs at their standard path.")
+        logging.log(EVENTS, "We can't find windows event logs at their standard path.")
     HAS_LIBS = False
 
 
