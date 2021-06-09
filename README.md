@@ -8,7 +8,7 @@
 
 <h3 align="center">CHIRP</h3>
 
-[![Status](https://img.shields.io/badge/status-active-success.svg)]()
+[![Status](https://img.shields.io/badge/status-archived-red.svg)]()
 [![GitHub Issues](https://img.shields.io/github/issues/cisagov/chirp.svg)](https://github.com/cisagov/chirp/issues)
 [![GitHub Pull Requests](https://img.shields.io/github/issues-pr/cisagov/chirp.svg)](https://github.com/cisagov/chirp/pulls)
 [![License](https://img.shields.io/badge/license-CC0_1.0-blue.svg)](/LICENSE)
